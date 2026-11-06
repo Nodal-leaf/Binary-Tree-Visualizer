@@ -4,9 +4,14 @@ This project is an interactive GUI simulation of Binary Search Trees (BST) and A
 
 ## Demo
 
-<video src="demo.mp4" controls="controls" width="100%"></video>
+https://github.com/Nodal-leaf/Binary-Tree-Visualizer/raw/main/demo.mp4
 
-> If the embedded video player above does not play directly in your viewer, you can watch or download the video here: **[demo.mp4](demo.mp4)**.
+<video src="https://github.com/Nodal-leaf/Binary-Tree-Visualizer/raw/main/demo.mp4" controls="controls" width="100%">
+  <source src="https://github.com/Nodal-leaf/Binary-Tree-Visualizer/raw/main/demo.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+> 🎬 **Direct Link**: [Watch or Download `demo.mp4`](https://github.com/Nodal-leaf/Binary-Tree-Visualizer/raw/main/demo.mp4)
 
 ---
 
