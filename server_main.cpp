@@ -18,7 +18,7 @@ int main(int argc, char* argv[]) {
     std::signal(SIGTERM, signalHandler);
 
     int port = 8080;
-    std::string host = "127.0.0.1";
+    std::string host = "0.0.0.0";
 
     if (argc >= 2) {
         try {
@@ -26,6 +26,9 @@ int main(int argc, char* argv[]) {
         } catch (...) {
             std::cerr << "Invalid port argument, defaulting to 8080" << std::endl;
         }
+    }
+    if (argc >= 3) {
+        host = argv[2];
     }
 
     std::cout << "Initializing Tree Backend Services..." << std::endl;

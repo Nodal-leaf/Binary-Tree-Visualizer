@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Find or include nlohmann/json
 find_package(nlohmann_json 3.2.0 QUIET)
+find_package(Threads REQUIRED)
 
 # Include directories
 include_directories(
@@ -47,7 +48,7 @@ add_executable(tree_server
     server_main.cpp
 )
 
-target_link_libraries(tree_server PRIVATE TreeBackend TreeModels)
+target_link_libraries(tree_server PRIVATE TreeBackend TreeModels Threads::Threads)
 if (WIN32)
     target_link_libraries(tree_server PRIVATE ws2_32 crypt32)
 endif()
