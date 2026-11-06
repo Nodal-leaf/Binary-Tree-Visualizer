@@ -416,3 +416,4 @@ class TreeVisualizer {
         if (window.AudioEngine) window.AudioEngine.playSuccess();
     }
 }
+

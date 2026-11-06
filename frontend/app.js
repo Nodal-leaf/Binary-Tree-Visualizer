@@ -616,3 +616,4 @@ class CosmosApp {
 window.addEventListener('DOMContentLoaded', () => {
     window.app = new CosmosApp();
 });
+
