@@ -57,3 +57,4 @@ try {
         Stop-Process -Id $serverProcess.Id -Force -ErrorAction SilentlyContinue
     }
 }
+

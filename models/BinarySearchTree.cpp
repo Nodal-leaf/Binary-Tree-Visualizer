@@ -176,6 +176,7 @@ nlohmann::json BinarySearchTree::toJson() const {
     j["inorder"] = inorder();
     j["preorder"] = preorder();
     j["postorder"] = postorder();
+    j["lastDeletion"] = lastDeletion_.toJson();
 
     if (root_ != nullptr) {
         j["root"] = root_->toJson();

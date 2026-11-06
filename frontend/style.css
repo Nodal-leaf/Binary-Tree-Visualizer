@@ -1067,9 +1067,72 @@ input[type="number"]:focus {
 
 .star-group.rotation-pivot .outer-orbital-ring {
     stroke: var(--neon-pink);
-    stroke-width: 3;
+    stroke-width: 3.5;
     stroke-dasharray: 6, 2;
-    animation: rotateOrbit 4s linear infinite;
+    animation: rotateOrbit 3s linear infinite;
+}
+
+.star-group.rotation-pivot .star-corona {
+    fill: url(#plasma-crimson);
+    filter: url(#super-glow);
+}
+
+.star-group.collapsing-target .star-corona {
+    fill: url(#plasma-crimson);
+    filter: url(#super-glow);
+    animation: targetWarning 0.6s infinite alternate;
+}
+
+.star-group.inorder-successor .star-corona {
+    fill: url(#plasma-gold);
+    filter: url(#super-glow);
+    animation: successorGlow 0.6s infinite alternate;
+}
+
+.star-group.inorder-successor .outer-orbital-ring {
+    stroke: var(--neon-gold);
+    stroke-width: 2.5;
+}
+
+@keyframes targetWarning {
+    from { transform: scale(1); filter: url(#glow-beam); }
+    to { transform: scale(1.22); filter: url(#super-glow); }
+}
+
+@keyframes successorGlow {
+    from { transform: scale(1); filter: url(#glow-beam); }
+    to { transform: scale(1.25); filter: url(#super-glow); }
+}
+
+/* Rotational Orbit Arc & Energy Flux */
+.rotation-flux-arc {
+    fill: none;
+    stroke: var(--neon-pink);
+    stroke-width: 3;
+    stroke-dasharray: 6, 4;
+    filter: url(#super-glow);
+    animation: rotateDash 1.2s linear infinite;
+}
+
+@keyframes rotateDash {
+    from { stroke-dashoffset: 20; }
+    to { stroke-dashoffset: 0; }
+}
+
+.swap-energy-beam {
+    fill: none;
+    stroke: var(--neon-gold);
+    stroke-width: 3.5;
+    stroke-dasharray: 8, 4;
+    filter: url(#super-glow);
+    animation: rotateDash 0.8s linear infinite;
+}
+
+.transfer-particle {
+    fill: #ffffff;
+    stroke: var(--neon-gold);
+    stroke-width: 2;
+    filter: url(#super-glow);
 }
 
 @keyframes starPulse {

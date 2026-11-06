@@ -65,10 +65,20 @@ Node* BST::removeHelper(Node* current, int value, bool& removed) {
 
         // Case 1 & 2: 0 or 1 child
         if (current->getLeft() == nullptr) {
+            lastDeletion_.occurred = true;
+            lastDeletion_.targetValue = value;
+            lastDeletion_.hasTwoChildren = false;
+            lastDeletion_.successorValue = 0;
+            lastDeletion_.description = "Target node " + std::to_string(value) + " removed (leaf or single child).";
             Node* temp = current->getRight();
             delete current;
             return temp;
         } else if (current->getRight() == nullptr) {
+            lastDeletion_.occurred = true;
+            lastDeletion_.targetValue = value;
+            lastDeletion_.hasTwoChildren = false;
+            lastDeletion_.successorValue = 0;
+            lastDeletion_.description = "Target node " + std::to_string(value) + " removed (leaf or single child).";
             Node* temp = current->getLeft();
             delete current;
             return temp;
@@ -77,6 +87,13 @@ Node* BST::removeHelper(Node* current, int value, bool& removed) {
         // Case 3: 2 children
         // Find inorder successor (minimum node in right subtree)
         Node* successor = findMin(current->getRight());
+        lastDeletion_.occurred = true;
+        lastDeletion_.targetValue = value;
+        lastDeletion_.hasTwoChildren = true;
+        lastDeletion_.successorValue = successor->getValue();
+        lastDeletion_.description = "Target node " + std::to_string(value) + " has 2 children: swapped with inorder successor " + 
+                                    std::to_string(successor->getValue()) + " (minimum of right subtree).";
+
         current->setValue(successor->getValue());
         // Recursively remove the successor from the right subtree
         bool dummyRemoved = false;
@@ -88,6 +105,7 @@ Node* BST::removeHelper(Node* current, int value, bool& removed) {
 }
 
 bool BST::remove(int value) {
+    clearLastDeletion();
     bool removed = false;
     root_ = removeHelper(root_, value, removed);
     if (removed) {

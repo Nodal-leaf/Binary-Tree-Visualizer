@@ -22,15 +22,23 @@ public:
     struct RotationStep {
         std::string type;          ///< "LL", "RR", "LR", or "RL"
         int rootValue;             ///< Key of the node that became unbalanced
-        int pivotValue;            ///< Key of the child or grandchild acting as rotation pivot
+        int pivotValue;            ///< Key of the child acting as rotation pivot
+        int grandchildValue = 0;   ///< Key of grandchild node in double rotations
+        std::string direction;     ///< "clockwise", "counter-clockwise", "double-LR", "double-RL"
         std::string description;   ///< Human-readable explanation of why and how rotation occurred
+        nlohmann::json treeBefore; ///< Snapshot before rotation
+        nlohmann::json treeAfter;  ///< Snapshot after rotation
 
         nlohmann::json toJson() const {
             return {
                 {"type", type},
                 {"rootValue", rootValue},
                 {"pivotValue", pivotValue},
-                {"description", description}
+                {"grandchildValue", grandchildValue},
+                {"direction", direction},
+                {"description", description},
+                {"treeBefore", treeBefore},
+                {"treeAfter", treeAfter}
             };
         }
     };

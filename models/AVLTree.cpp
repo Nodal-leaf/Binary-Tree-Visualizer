@@ -75,23 +75,32 @@ Node* AVLTree::balance(Node* node) {
             // LL Rotation
             RotationStep step;
             step.type = "LL";
+            step.direction = "clockwise";
             step.rootValue = node->getValue();
             step.pivotValue = node->getLeft()->getValue();
             step.description = "Left-Left imbalance at node " + std::to_string(step.rootValue) +
-                               ": performed single Right Rotation around " + std::to_string(step.pivotValue);
+                               ": performed single Right Rotation (clockwise) around pivot " + std::to_string(step.pivotValue);
+            step.treeBefore = (root_ != nullptr) ? root_->toJson() : nullptr;
+            Node* res = rotateRight(node);
+            step.treeAfter = (root_ != nullptr) ? root_->toJson() : nullptr;
             lastRotations_.push_back(step);
-            return rotateRight(node);
+            return res;
         } else if (node->getLeft() != nullptr) {
             // LR Rotation
             RotationStep step;
             step.type = "LR";
+            step.direction = "double-LR";
             step.rootValue = node->getValue();
             step.pivotValue = node->getLeft()->getValue();
+            step.grandchildValue = (node->getLeft()->getRight() != nullptr) ? node->getLeft()->getRight()->getValue() : 0;
             step.description = "Left-Right imbalance at node " + std::to_string(step.rootValue) +
-                               ": performed Left Rotation on child " + std::to_string(step.pivotValue) +
-                               " followed by Right Rotation on " + std::to_string(step.rootValue);
+                               ": Step 1: Left rotation on child " + std::to_string(step.pivotValue) +
+                               "; Step 2: Right rotation on root " + std::to_string(step.rootValue);
+            step.treeBefore = (root_ != nullptr) ? root_->toJson() : nullptr;
+            Node* res = rotateLeftRight(node);
+            step.treeAfter = (root_ != nullptr) ? root_->toJson() : nullptr;
             lastRotations_.push_back(step);
-            return rotateLeftRight(node);
+            return res;
         }
     }
 
@@ -101,23 +110,32 @@ Node* AVLTree::balance(Node* node) {
             // RR Rotation
             RotationStep step;
             step.type = "RR";
+            step.direction = "counter-clockwise";
             step.rootValue = node->getValue();
             step.pivotValue = node->getRight()->getValue();
             step.description = "Right-Right imbalance at node " + std::to_string(step.rootValue) +
-                               ": performed single Left Rotation around " + std::to_string(step.pivotValue);
+                               ": performed single Left Rotation (counter-clockwise) around pivot " + std::to_string(step.pivotValue);
+            step.treeBefore = (root_ != nullptr) ? root_->toJson() : nullptr;
+            Node* res = rotateLeft(node);
+            step.treeAfter = (root_ != nullptr) ? root_->toJson() : nullptr;
             lastRotations_.push_back(step);
-            return rotateLeft(node);
+            return res;
         } else if (node->getRight() != nullptr) {
             // RL Rotation
             RotationStep step;
             step.type = "RL";
+            step.direction = "double-RL";
             step.rootValue = node->getValue();
             step.pivotValue = node->getRight()->getValue();
+            step.grandchildValue = (node->getRight()->getLeft() != nullptr) ? node->getRight()->getLeft()->getValue() : 0;
             step.description = "Right-Left imbalance at node " + std::to_string(step.rootValue) +
-                               ": performed Right Rotation on child " + std::to_string(step.pivotValue) +
-                               " followed by Left Rotation on " + std::to_string(step.rootValue);
+                               ": Step 1: Right rotation on child " + std::to_string(step.pivotValue) +
+                               "; Step 2: Left rotation on root " + std::to_string(step.rootValue);
+            step.treeBefore = (root_ != nullptr) ? root_->toJson() : nullptr;
+            Node* res = rotateRightLeft(node);
+            step.treeAfter = (root_ != nullptr) ? root_->toJson() : nullptr;
             lastRotations_.push_back(step);
-            return rotateRightLeft(node);
+            return res;
         }
     }
 
@@ -168,6 +186,12 @@ Node* AVLTree::removeHelper(Node* current, int value, bool& removed) {
         removed = true;
 
         if (current->getLeft() == nullptr || current->getRight() == nullptr) {
+            lastDeletion_.occurred = true;
+            lastDeletion_.targetValue = value;
+            lastDeletion_.hasTwoChildren = false;
+            lastDeletion_.successorValue = 0;
+            lastDeletion_.description = "Target node " + std::to_string(value) + " removed (leaf or single child).";
+
             Node* temp = (current->getLeft() != nullptr) ? current->getLeft() : current->getRight();
             if (temp == nullptr) {
                 // No child (leaf node)
@@ -181,6 +205,13 @@ Node* AVLTree::removeHelper(Node* current, int value, bool& removed) {
         } else {
             // Two children
             Node* successor = findMin(current->getRight());
+            lastDeletion_.occurred = true;
+            lastDeletion_.targetValue = value;
+            lastDeletion_.hasTwoChildren = true;
+            lastDeletion_.successorValue = successor->getValue();
+            lastDeletion_.description = "Target node " + std::to_string(value) + " has 2 children: swapped with inorder successor " + 
+                                        std::to_string(successor->getValue()) + " (minimum of right subtree).";
+
             current->setValue(successor->getValue());
             bool dummyRemoved = false;
             current->setRight(removeHelper(current->getRight(), successor->getValue(), dummyRemoved));
@@ -197,6 +228,7 @@ Node* AVLTree::removeHelper(Node* current, int value, bool& removed) {
 
 bool AVLTree::remove(int value) {
     clearLastRotations();
+    clearLastDeletion();
     bool removed = false;
     root_ = removeHelper(root_, value, removed);
     if (removed) {

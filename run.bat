@@ -43,3 +43,4 @@ echo.
 
 :: Keep script alive until user exits
 cmd /k
+

@@ -22,6 +22,31 @@ protected:
     int nodeCount_;       ///< Current number of nodes
     int nextNodeId_;      ///< Counter for issuing unique node IDs
 
+public:
+    /**
+     * @brief Structure capturing details of a deletion event for GUI simulation.
+     */
+    struct DeletionEvent {
+        bool occurred = false;
+        int targetValue = 0;
+        bool hasTwoChildren = false;
+        int successorValue = 0;    ///< Inorder successor key swapped into target
+        std::string description;
+
+        nlohmann::json toJson() const {
+            return {
+                {"occurred", occurred},
+                {"targetValue", targetValue},
+                {"hasTwoChildren", hasTwoChildren},
+                {"successorValue", successorValue},
+                {"description", description}
+            };
+        }
+    };
+
+protected:
+    DeletionEvent lastDeletion_;  ///< Details of last deletion operation
+
     // Recursive helper utilities
     void destroySubtree(Node* node);
     Node* cloneSubtree(const Node* node);
@@ -120,6 +145,16 @@ public:
      * @brief Clears all nodes from the tree and resets state.
      */
     virtual void clear();
+
+    /**
+     * @brief Access telemetry about the last deletion operation.
+     */
+    const DeletionEvent& getLastDeletion() const { return lastDeletion_; }
+
+    /**
+     * @brief Resets last deletion telemetry.
+     */
+    void clearLastDeletion() { lastDeletion_ = DeletionEvent{}; }
 
     /**
      * @brief Read-only accessor to the root node.

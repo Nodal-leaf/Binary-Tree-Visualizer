@@ -393,21 +393,22 @@ class CosmosApp {
 
             const data = await res.json();
             if (data.success) {
-                // If animation path returned, sweep path first
+                // Step 1: Trace insertion comparison sweep
                 if (data.searchPath && data.searchPath.length > 0) {
                     await this.visualizer.animateSearchPath(data.searchPath, true, this.speedMultiplier);
                 }
 
-                // Check rotations
+                // Step 2: Render newly inserted star and updated layout
+                this.visualizer.renderTree(data.tree);
+                this.updateTelemetry(data.tree);
+
+                // Step 3: If AVL rebalancing occurred, animate each rotation with flux arcs
                 if (data.tree && data.tree.lastRotations && data.tree.lastRotations.length > 0) {
                     this.showWarpBanner(data.tree.lastRotations);
                     for (const rot of data.tree.lastRotations) {
                         await this.visualizer.animateRotation(rot, this.speedMultiplier);
                     }
                 }
-
-                this.visualizer.renderTree(data.tree);
-                this.updateTelemetry(data.tree);
                 this.log('success', data.message);
                 this.inputVal.value = '';
             } else {
@@ -437,16 +438,30 @@ class CosmosApp {
 
             const data = await res.json();
             if (data.success) {
+                // Step 1: Animate search sweep to target node
                 if (data.searchPath && data.searchPath.length > 0) {
                     await this.visualizer.animateSearchPath(data.searchPath, true, this.speedMultiplier);
                 }
 
-                if (data.tree && data.tree.lastRotations && data.tree.lastRotations.length > 0) {
-                    this.showWarpBanner(data.tree.lastRotations);
+                // Step 2: Check if two-children deletion swap occurred
+                const deletionInfo = data.lastDeletion || (data.tree && data.tree.lastDeletion);
+                if (deletionInfo && deletionInfo.hasTwoChildren && deletionInfo.successorValue) {
+                    this.log('warn', `[STELLAR SWAP] Target Star ${deletionInfo.targetValue} has 2 children -> Swapping with Inorder Successor Star ${deletionInfo.successorValue}`);
+                    await this.visualizer.animateSwap(deletionInfo.targetValue, deletionInfo.successorValue, this.speedMultiplier);
                 }
 
+                // Step 3: Render updated tree state
                 this.visualizer.renderTree(data.tree);
                 this.updateTelemetry(data.tree);
+
+                // Step 4: Animate any AVL rotations triggered by the deletion rebalancing
+                if (data.tree && data.tree.lastRotations && data.tree.lastRotations.length > 0) {
+                    this.showWarpBanner(data.tree.lastRotations);
+                    for (const rot of data.tree.lastRotations) {
+                        await this.visualizer.animateRotation(rot, this.speedMultiplier);
+                    }
+                }
+
                 this.log('success', data.message);
                 this.inputVal.value = '';
             } else {

@@ -366,21 +366,122 @@ class TreeVisualizer {
     }
 
     /**
-     * Animate an AVL rotation event (LL, RR, LR, RL)
+     * Animate a 2-children deletion swap:
+     * Highlights target node and inorder successor, draws an energetic beam between them,
+     * glides a transfer particle carrying the successor's key to replace the target,
+     * and dissolves the old successor position!
+     */
+    async animateSwap(targetVal, successorVal, speedMultiplier = 1.0) {
+        const targetEl = this.nodeElements.get(targetVal);
+        const successorEl = this.nodeElements.get(successorVal);
+        const targetPos = this.nodeCoordinates.get(targetVal);
+        const successorPos = this.nodeCoordinates.get(successorVal);
+
+        if (!targetEl || !successorEl || !targetPos || !successorPos) return;
+
+        // Step 1: Highlight target in crimson and successor in gold
+        targetEl.classList.add('collapsing-target');
+        successorEl.classList.add('inorder-successor');
+
+        if (window.AudioEngine) window.AudioEngine.playNodeHover(successorVal);
+
+        // Step 2: Draw connecting curved energy beam
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        const midX = (targetPos.x + successorPos.x) / 2 - 35;
+        const midY = (targetPos.y + successorPos.y) / 2;
+        const d = `M ${successorPos.x} ${successorPos.y} Q ${midX} ${midY} ${targetPos.x} ${targetPos.y}`;
+        path.setAttribute('d', d);
+        path.setAttribute('class', 'swap-energy-beam');
+        this.particlesLayer.appendChild(path);
+
+        // Step 3: Create floating transfer entity carrying the successor value
+        const orbGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        const orb = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        orb.setAttribute('r', '15');
+        orb.setAttribute('class', 'transfer-particle');
+
+        const orbText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        orbText.setAttribute('class', 'star-key-text');
+        orbText.setAttribute('style', 'font-size: 11px; fill: #000000; font-weight: 800;');
+        orbText.textContent = successorVal;
+
+        orbGroup.appendChild(orb);
+        orbGroup.appendChild(orbText);
+        orbGroup.setAttribute('transform', `translate(${successorPos.x}, ${successorPos.y})`);
+        this.particlesLayer.appendChild(orbGroup);
+
+        const duration = 1200 / speedMultiplier;
+        const startTime = performance.now();
+
+        // Animate along curve
+        await new Promise(resolve => {
+            function step(now) {
+                const elapsed = now - startTime;
+                const t = Math.min(elapsed / duration, 1.0);
+
+                // Quadratic bezier interpolation
+                const curX = Math.pow(1 - t, 2) * successorPos.x + 2 * (1 - t) * t * midX + Math.pow(t, 2) * targetPos.x;
+                const curY = Math.pow(1 - t, 2) * successorPos.y + 2 * (1 - t) * t * midY + Math.pow(t, 2) * targetPos.y;
+                orbGroup.setAttribute('transform', `translate(${curX}, ${curY})`);
+
+                if (t < 1.0) {
+                    requestAnimationFrame(step);
+                } else {
+                    resolve();
+                }
+            }
+            requestAnimationFrame(step);
+        });
+
+        // Step 4: Flash target text to successor value
+        const targetText = targetEl.querySelector('.star-key-text');
+        if (targetText) {
+            targetText.textContent = successorVal;
+        }
+        if (window.AudioEngine) window.AudioEngine.playSuccess();
+
+        // Clean up animation elements
+        path.remove();
+        orbGroup.remove();
+
+        await new Promise(r => setTimeout(r, 450 / speedMultiplier));
+
+        targetEl.classList.remove('collapsing-target');
+        successorEl.classList.remove('inorder-successor');
+    }
+
+    /**
+     * Enhanced animation for AVL Rotations:
+     * Draws rotational flux vector, marks unbalanced root and pivot nodes,
+     * and shows directional orbital movement!
      */
     async animateRotation(rotationEvent, speedMultiplier = 1.0) {
         const rootEl = this.nodeElements.get(rotationEvent.rootValue);
         const pivotEl = this.nodeElements.get(rotationEvent.pivotValue);
+        const rootPos = this.nodeCoordinates.get(rotationEvent.rootValue);
+        const pivotPos = this.nodeCoordinates.get(rotationEvent.pivotValue);
 
         if (rootEl) rootEl.classList.add('rotation-pivot');
         if (pivotEl) pivotEl.classList.add('active-sweep');
 
+        let fluxArc = null;
+        if (rootPos && pivotPos) {
+            fluxArc = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            const sweepFlag = (rotationEvent.type === 'LL' || rotationEvent.direction === 'clockwise') ? 0 : 1;
+            const radius = Math.hypot(rootPos.x - pivotPos.x, rootPos.y - pivotPos.y);
+            const d = `M ${rootPos.x} ${rootPos.y} A ${radius} ${radius} 0 0 ${sweepFlag} ${pivotPos.x} ${pivotPos.y}`;
+            fluxArc.setAttribute('d', d);
+            fluxArc.setAttribute('class', 'rotation-flux-arc');
+            this.particlesLayer.appendChild(fluxArc);
+        }
+
         if (window.AudioEngine) window.AudioEngine.playWarp();
 
-        // Keep highlight briefly while banner is shown
-        const displayTime = 1200 / speedMultiplier;
+        // Keep highlight and rotation arc visible for comprehension
+        const displayTime = 1400 / speedMultiplier;
         await new Promise(r => setTimeout(r, displayTime));
 
+        if (fluxArc) fluxArc.remove();
         if (rootEl) rootEl.classList.remove('rotation-pivot');
         if (pivotEl) pivotEl.classList.remove('active-sweep');
     }
