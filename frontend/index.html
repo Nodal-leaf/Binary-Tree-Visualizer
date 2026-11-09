@@ -3,283 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cosmic Tree Visualizer // Interstellar BST & AVL Simulation</title>
+    <title>Binary Tree Visualizer // Minimalist Neon</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="theme-cosmos">
-    <!-- Background Canvas for Space Dust, Stars, and Nebulae -->
-    <canvas id="cosmic-canvas"></canvas>
+<body>
+    <!-- Minimalist Floating Control Bar -->
+    <header class="control-bar">
+        <!-- Tree Mode Toggle -->
+        <div class="btn-group mode-group">
+            <button id="mode-bst" class="btn mode-btn" data-mode="BST">BST</button>
+            <button id="mode-avl" class="btn mode-btn active" data-mode="AVL">AVL</button>
+        </div>
 
-    <!-- App Container -->
-    <div id="app">
-        <!-- Top Navigation & Status Bar -->
-        <header class="hud-header">
-            <div class="brand">
-                <div class="stellar-icon">
-                    <span class="pulsar-dot"></span>
-                    <span class="pulsar-ring"></span>
-                </div>
-                <div class="brand-text">
-                    <h1>CHRONO<span class="glow-accent">COSMOS</span></h1>
-                    <p class="tagline">Interstellar Binary Search & AVL Tree Simulation</p>
-                </div>
-            </div>
+        <div class="divider"></div>
 
-            <!-- Mode Selector: BST vs AVL -->
-            <div class="mode-selector-container">
-                <div class="mode-switch">
-                    <button id="mode-bst" class="mode-btn" data-mode="BST">
-                        <span class="btn-indicator"></span>
-                        <span class="btn-label">BST (Nebula)</span>
-                    </button>
-                    <button id="mode-avl" class="mode-btn active" data-mode="AVL">
-                        <span class="btn-indicator"></span>
-                        <span class="btn-label">AVL (Equilibrium)</span>
-                    </button>
-                </div>
-            </div>
+        <!-- Operations Group -->
+        <div class="action-group">
+            <input type="number" id="node-value-input" placeholder="Value" min="1" max="999" autocomplete="off">
+            <button id="btn-insert" class="btn btn-primary" title="Insert Node">Insert</button>
+            <button id="btn-delete" class="btn" title="Delete Node">Delete</button>
+            <button id="btn-search" class="btn" title="Search Node">Search</button>
+            <button id="btn-random-val" class="btn btn-icon" title="Random Value">🎲</button>
+            <button id="btn-sample" class="btn" title="Load Sample Tree">Sample</button>
+            <button id="btn-clear" class="btn btn-danger" title="Clear Tree">Clear</button>
+        </div>
 
-            <!-- Telemetry Badges -->
-            <div class="hud-telemetry">
-                <div class="telemetry-badge">
-                    <span class="badge-label">Active Stars</span>
-                    <span id="stat-nodes" class="badge-val">0</span>
-                </div>
-                <div class="telemetry-badge">
-                    <span class="badge-label">Constellation Depth</span>
-                    <span id="stat-height" class="badge-val">0</span>
-                </div>
-                <div class="telemetry-badge">
-                    <span class="badge-label">Core Status</span>
-                    <span id="stat-status" class="badge-val online">ONLINE</span>
-                </div>
-            </div>
-        </header>
+        <div class="divider"></div>
 
-        <!-- Main Body Layout -->
-        <div class="main-layout">
-            <!-- Left Command Dock -->
-            <aside class="command-dock">
-                <div class="dock-section">
-                    <h2 class="section-title"><span class="title-glyph">◈</span> Stellar Operations</h2>
-                    
-                    <!-- Input and Action Group -->
-                    <div class="input-card">
-                        <label for="node-value-input">Star Key / Energy Value</label>
-                        <div class="input-with-button">
-                            <input type="number" id="node-value-input" placeholder="e.g. 42" min="1" max="999" autocomplete="off">
-                            <button id="btn-random-val" title="Generate Random Star" class="icon-btn">🎲</button>
-                        </div>
-                    </div>
+        <!-- Traversals -->
+        <div class="btn-group traversal-group">
+            <button class="btn traversal-btn" data-traversal="inorder" title="Inorder Traversal">Inorder</button>
+            <button class="btn traversal-btn" data-traversal="preorder" title="Preorder Traversal">Preorder</button>
+            <button class="btn traversal-btn" data-traversal="postorder" title="Postorder Traversal">Postorder</button>
+        </div>
 
-                    <div class="action-grid">
-                        <button id="btn-insert" class="action-btn insert-btn">
-                            <span class="btn-icon">✦</span>
-                            <span>Spawn Star</span>
-                        </button>
-                        <button id="btn-delete" class="action-btn delete-btn">
-                            <span class="btn-icon">▲</span>
-                            <span>Collapse Star</span>
-                        </button>
-                        <button id="btn-search" class="action-btn search-btn">
-                            <span class="btn-icon">⌖</span>
-                            <span>Sensor Sweep</span>
-                        </button>
-                        <button id="btn-sample" class="action-btn sample-btn">
-                            <span class="btn-icon">✧</span>
-                            <span>Preset Galaxy</span>
-                        </button>
-                    </div>
+        <div class="divider"></div>
 
-                    <button id="btn-clear" class="action-btn clear-btn">
-                        <span class="btn-icon">⊗</span>
-                        <span>Supernova Clear</span>
-                    </button>
-                </div>
+        <!-- Telemetry & Status -->
+        <div class="stats-group">
+            <span class="stat-pill">Nodes: <b id="stat-nodes">0</b></span>
+            <span class="stat-pill">Height: <b id="stat-height">0</b></span>
+            <span id="stat-status" class="status-dot online" title="Core Online">●</span>
+        </div>
+    </header>
 
-                <!-- Traversal Dock -->
-                <div class="dock-section">
-                    <h2 class="section-title"><span class="title-glyph">◈</span> Constellation Beacons</h2>
-                    <div class="traversal-buttons">
-                        <button class="traversal-btn" data-traversal="inorder">
-                            <span class="t-type">Inorder</span>
-                            <span class="t-desc">Ascending Harmonic (L-R-R)</span>
-                        </button>
-                        <button class="traversal-btn" data-traversal="preorder">
-                            <span class="t-type">Preorder</span>
-                            <span class="t-desc">Root Vector Drift (R-L-R)</span>
-                        </button>
-                        <button class="traversal-btn" data-traversal="postorder">
-                            <span class="t-type">Postorder</span>
-                            <span class="t-desc">Perimeter Collapse (L-R-R)</span>
-                        </button>
-                    </div>
-                </div>
+    <!-- Fullscreen SVG Canvas Container -->
+    <main id="svg-container">
+        <svg id="tree-svg" width="100%" height="100%">
+            <defs>
+                <!-- Neon Green Glow Filters -->
+                <filter id="neon-glow" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur1" />
+                    <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur2" />
+                    <feMerge>
+                        <feMergeNode in="blur2" />
+                        <feMergeNode in="blur1" />
+                        <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                </filter>
 
-                <!-- Simulation Speed Control -->
-                <div class="dock-section">
-                    <div class="speed-header">
-                        <span class="section-title"><span class="title-glyph">◈</span> Warp Factor</span>
-                        <span id="speed-display" class="speed-val">1.0x</span>
-                    </div>
-                    <input type="range" id="speed-slider" min="0.3" max="2.5" step="0.1" value="1.0" class="cosmos-slider">
-                </div>
+                <filter id="edge-glow" x="-30%" y="-30%" width="160%" height="160%">
+                    <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur" />
+                    <feMerge>
+                        <feMergeNode in="blur" />
+                        <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                </filter>
 
-                <!-- Sound Effects Toggle -->
-                <div class="dock-section sound-section">
-                    <label class="toggle-control">
-                        <input type="checkbox" id="audio-toggle" checked>
-                        <span class="toggle-slider"></span>
-                        <span class="toggle-text">Quantum Audio Synthesis</span>
-                    </label>
-                </div>
-            </aside>
+                <!-- Radial Gradients for Neon Nodes -->
+                <radialGradient id="plasma-green" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#39ff14" stop-opacity="0.25" />
+                    <stop offset="55%" stop-color="#00ff66" stop-opacity="0.1" />
+                    <stop offset="100%" stop-color="#000000" stop-opacity="0.95" />
+                </radialGradient>
 
-            <!-- Center Visualizer Canvas Stage -->
-            <main class="visualizer-stage">
-                <!-- Warp Alert Banner (Pop up during rotations) -->
-                <div id="warp-banner" class="warp-banner hidden">
-                    <div class="warp-banner-content">
-                        <span class="warp-indicator">⚠ GRAVITATIONAL WARP DETECTED</span>
-                        <span id="warp-title" class="warp-title">RR ROTATION</span>
-                        <span id="warp-desc" class="warp-desc">Right-Right imbalance restored around orbital pivot</span>
-                    </div>
-                </div>
+                <radialGradient id="plasma-cyan" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#39ff14" stop-opacity="0.25" />
+                    <stop offset="55%" stop-color="#00ff66" stop-opacity="0.1" />
+                    <stop offset="100%" stop-color="#000000" stop-opacity="0.95" />
+                </radialGradient>
 
-                <!-- View Controls: Zoom, Pan, Center -->
-                <div class="viewport-controls">
-                    <button id="btn-zoom-in" class="ctrl-btn" title="Zoom In">+</button>
-                    <button id="btn-zoom-reset" class="ctrl-btn" title="Center View">⛶</button>
-                    <button id="btn-zoom-out" class="ctrl-btn" title="Zoom Out">−</button>
-                </div>
+                <radialGradient id="plasma-gold" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#ffff33" stop-opacity="0.35" />
+                    <stop offset="60%" stop-color="#ffd700" stop-opacity="0.15" />
+                    <stop offset="100%" stop-color="#000000" stop-opacity="0.95" />
+                </radialGradient>
 
-                <!-- Legend Overlay -->
-                <div class="stellar-legend">
-                    <div class="legend-item"><span class="legend-color core-star"></span> Star (Root/Node)</div>
-                    <div class="legend-item"><span class="legend-color bf-balanced"></span> Balanced (BF: 0)</div>
-                    <div class="legend-item"><span class="legend-color bf-warn"></span> Tilted (BF: ±1)</div>
-                    <div class="legend-item"><span class="legend-color bf-critical"></span> Critical (BF: ±2)</div>
-                </div>
+                <radialGradient id="plasma-purple" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#39ff14" stop-opacity="0.25" />
+                    <stop offset="60%" stop-color="#00ff66" stop-opacity="0.1" />
+                    <stop offset="100%" stop-color="#000000" stop-opacity="0.95" />
+                </radialGradient>
 
-                <!-- SVG Tree Canvas -->
-                <div id="svg-container">
-                    <svg id="tree-svg" width="100%" height="100%">
-                        <defs>
-                            <!-- Glow filters -->
-                            <filter id="glow-beam" x="-20%" y="-20%" width="140%" height="140%">
-                                <feGaussianBlur stdDeviation="3.5" result="blur" />
-                                <feMerge>
-                                    <feMergeNode in="blur" />
-                                    <feMergeNode in="SourceGraphic" />
-                                </feMerge>
-                            </filter>
-                            <filter id="super-glow" x="-50%" y="-50%" width="200%" height="200%">
-                                <feGaussianBlur stdDeviation="7" result="blur1" />
-                                <feGaussianBlur stdDeviation="15" result="blur2" />
-                                <feMerge>
-                                    <feMergeNode in="blur2" />
-                                    <feMergeNode in="blur1" />
-                                    <feMergeNode in="SourceGraphic" />
-                                </feMerge>
-                            </filter>
+                <radialGradient id="plasma-crimson" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#ff3366" stop-opacity="0.35" />
+                    <stop offset="60%" stop-color="#ff0033" stop-opacity="0.15" />
+                    <stop offset="100%" stop-color="#000000" stop-opacity="0.95" />
+                </radialGradient>
 
-                            <!-- Radial Gradients for Stars -->
-                            <radialGradient id="plasma-cyan" cx="50%" cy="50%" r="50%">
-                                <stop offset="0%" stop-color="#ffffff" />
-                                <stop offset="35%" stop-color="#55ffff" />
-                                <stop offset="75%" stop-color="#00a8ff" />
-                                <stop offset="100%" stop-color="#004488" />
-                            </radialGradient>
-                            
-                            <radialGradient id="plasma-gold" cx="50%" cy="50%" r="50%">
-                                <stop offset="0%" stop-color="#ffffff" />
-                                <stop offset="35%" stop-color="#ffeaa7" />
-                                <stop offset="75%" stop-color="#fdcb6e" />
-                                <stop offset="100%" stop-color="#e17055" />
-                            </radialGradient>
+                <linearGradient id="beam-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#00ff66" stop-opacity="0.9" />
+                    <stop offset="100%" stop-color="#39ff14" stop-opacity="0.5" />
+                </linearGradient>
+            </defs>
 
-                            <radialGradient id="plasma-purple" cx="50%" cy="50%" r="50%">
-                                <stop offset="0%" stop-color="#ffffff" />
-                                <stop offset="35%" stop-color="#e056fd" />
-                                <stop offset="75%" stop-color="#be2edd" />
-                                <stop offset="100%" stop-color="#4834d4" />
-                            </radialGradient>
+            <!-- Transformed Viewport Layer -->
+            <g id="viewport-group">
+                <g id="edges-layer"></g>
+                <g id="nodes-layer"></g>
+                <g id="particles-layer"></g>
+            </g>
+        </svg>
 
-                            <radialGradient id="plasma-crimson" cx="50%" cy="50%" r="50%">
-                                <stop offset="0%" stop-color="#ffffff" />
-                                <stop offset="35%" stop-color="#ff7675" />
-                                <stop offset="75%" stop-color="#d63031" />
-                                <stop offset="100%" stop-color="#2d3436" />
-                            </radialGradient>
+        <!-- Minimal Empty State Prompt -->
+        <div id="empty-state" class="empty-state hidden">
+            <span class="empty-glow">✧</span>
+            <p>Tree is empty. Insert a value or click Sample.</p>
+        </div>
+    </main>
 
-                            <!-- Beam Gradient -->
-                            <linearGradient id="beam-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                                <stop offset="0%" stop-color="#00f2fe" stop-opacity="0.8" />
-                                <stop offset="100%" stop-color="#4facfe" stop-opacity="0.5" />
-                            </linearGradient>
-                        </defs>
+    <!-- Floating Minimal Viewport Controls (Bottom-Right) -->
+    <div class="viewport-controls">
+        <button id="btn-zoom-in" class="ctrl-btn" title="Zoom In">+</button>
+        <button id="btn-zoom-reset" class="ctrl-btn" title="Reset View">⛶</button>
+        <button id="btn-zoom-out" class="ctrl-btn" title="Zoom Out">−</button>
+    </div>
 
-                        <!-- Transformed Viewport Layer -->
-                        <g id="viewport-group">
-                            <g id="edges-layer"></g>
-                            <g id="nodes-layer"></g>
-                            <g id="particles-layer"></g>
-                        </g>
-                    </svg>
-                </div>
-
-                <!-- Empty State Message -->
-                <div id="empty-state" class="empty-state hidden">
-                    <div class="empty-core">
-                        <div class="empty-ring"></div>
-                        <span class="empty-icon">✧</span>
-                    </div>
-                    <h3>THE VOID IS SILENT</h3>
-                    <p>Spawn a star entity or load a Galaxy Preset to initiate the celestial simulation.</p>
-                </div>
-
-                <!-- Live Traversal Sequence Banner -->
-                <div id="traversal-display" class="traversal-display hidden">
-                    <div class="traversal-header">
-                        <span id="traversal-title">INORDER CONSTELLATION SEQUENCE</span>
-                        <button id="btn-close-traversal" class="close-btn">✕</button>
-                    </div>
-                    <div id="traversal-chips" class="traversal-chips"></div>
-                </div>
-            </main>
-
-            <!-- Right Telemetry & Event Terminal -->
-            <aside class="telemetry-dock">
-                <div class="dock-section">
-                    <h2 class="section-title"><span class="title-glyph">◈</span> Targeted Entity</h2>
-                    <div id="selected-node-card" class="entity-card empty">
-                        <p class="select-hint">Click any star entity in the galaxy to view celestial metrics.</p>
-                    </div>
-                </div>
-
-                <div class="dock-section terminal-section">
-                    <div class="terminal-header">
-                        <h2 class="section-title"><span class="title-glyph">◈</span> Mission Log</h2>
-                        <button id="btn-clear-log" class="text-btn">Clear</button>
-                    </div>
-                    <div id="mission-log" class="terminal-body">
-                        <div class="log-entry info">
-                            <span class="log-time">[INIT]</span>
-                            <span class="log-text">Cosmic Simulation System online. Ready for orbital commands.</span>
-                        </div>
-                    </div>
-                </div>
-            </aside>
+    <!-- Minimal Toast Notification for Rotations -->
+    <div id="warp-banner" class="minimal-toast hidden">
+        <span class="toast-badge">AVL REBALANCE</span>
+        <div class="toast-text">
+            <span id="warp-title" class="toast-title">RR ROTATION</span>
+            <span id="warp-desc" class="toast-desc">Node 30 rotated</span>
         </div>
     </div>
 
+    <!-- Minimal Floating Traversal Sequence Bar -->
+    <div id="traversal-display" class="minimal-traversal-bar hidden">
+        <span id="traversal-title" class="traversal-title">INORDER:</span>
+        <div id="traversal-chips" class="traversal-chips"></div>
+        <button id="btn-close-traversal" class="close-btn" title="Close">✕</button>
+    </div>
+
+    <!-- Minimal Node Details Card (Bottom-Left popup when node is clicked) -->
+    <div id="selected-node-card" class="minimal-node-card hidden"></div>
+
+    <!-- Hidden compatibility elements required by app.js -->
+    <div style="display:none;" aria-hidden="true">
+        <div id="mission-log"></div>
+        <button id="btn-clear-log"></button>
+        <input type="range" id="speed-slider" value="1.0">
+        <span id="speed-display">1.0x</span>
+        <input type="checkbox" id="audio-toggle" checked>
+    </div>
+
     <!-- Scripts -->
-    <script src="cosmic-canvas.js"></script>
     <script src="tree-visualizer.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
-

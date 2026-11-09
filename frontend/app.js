@@ -296,50 +296,37 @@ class CosmosApp {
     }
 
     showNodeTelemetry(node) {
-        if (!node) return;
+        if (!node || !this.nodeCard) return;
         const bf = node.balanceFactor || 0;
         let bfLabel = 'Balanced (0)';
         if (Math.abs(bf) === 1) bfLabel = `Tilted (${bf > 0 ? '+' : ''}${bf})`;
-        if (Math.abs(bf) > 1) bfLabel = `Critical Imbalance (${bf > 0 ? '+' : ''}${bf})`;
+        if (Math.abs(bf) > 1) bfLabel = `Critical (${bf > 0 ? '+' : ''}${bf})`;
 
-        this.nodeCard.className = 'entity-card';
+        this.nodeCard.classList.remove('hidden');
         this.nodeCard.innerHTML = `
-            <div class="entity-header">
-                <span class="entity-val">STAR #${node.value}</span>
-                <span class="entity-id">ID: 0x${node.id.toString(16).toUpperCase()}</span>
-            </div>
-            <div class="entity-meta-grid">
-                <div class="meta-field">
-                    <span class="meta-key">Height</span>
-                    <span class="meta-val">${node.height}</span>
-                </div>
-                <div class="meta-field">
-                    <span class="meta-key">Balance</span>
-                    <span class="meta-val">${bfLabel}</span>
-                </div>
-                <div class="meta-field">
-                    <span class="meta-key">Left Child</span>
-                    <span class="meta-val">${node.left ? node.left.value : 'None (Void)'}</span>
-                </div>
-                <div class="meta-field">
-                    <span class="meta-key">Right Child</span>
-                    <span class="meta-val">${node.right ? node.right.value : 'None (Void)'}</span>
-                </div>
-            </div>
-            <div class="entity-quick-actions">
-                <button id="quick-sweep" class="quick-action-btn">Sweep Sensor</button>
-                <button id="quick-collapse" class="quick-action-btn">Collapse Star</button>
+            <div class="node-card-content">
+                <span class="node-badge">NODE <b>${node.value}</b></span>
+                <span class="node-meta">H: <b>${node.height}</b></span>
+                <span class="node-meta">BF: <b>${bfLabel}</b></span>
+                <button id="quick-sweep" class="btn btn-sm">Search</button>
+                <button id="quick-collapse" class="btn btn-sm btn-danger">Delete</button>
+                <button id="quick-close" class="close-btn" style="margin-left:4px">✕</button>
             </div>
         `;
 
-        document.getElementById('quick-sweep').addEventListener('click', () => {
+        document.getElementById('quick-sweep')?.addEventListener('click', () => {
             this.inputVal.value = node.value;
             this.handleSearch();
         });
 
-        document.getElementById('quick-collapse').addEventListener('click', () => {
+        document.getElementById('quick-collapse')?.addEventListener('click', () => {
             this.inputVal.value = node.value;
             this.handleDelete();
+        });
+
+        document.getElementById('quick-close')?.addEventListener('click', () => {
+            this.nodeCard.classList.add('hidden');
+            this.visualizer.clearHighlights();
         });
     }
 
@@ -352,8 +339,10 @@ class CosmosApp {
             const res = await fetch(`${this.apiBase}/tree`);
             if (res.ok) {
                 const data = await res.json();
-                this.statStatus.textContent = 'ONLINE';
-                this.statStatus.className = 'badge-val online';
+                if (this.statStatus) {
+                    this.statStatus.className = 'status-dot online';
+                    this.statStatus.title = 'Core Online';
+                }
                 this.log('success', 'Connected to C++ Backend REST Engine.');
                 this.updateTelemetry(data.tree);
                 this.visualizer.renderTree(data.tree);
@@ -361,8 +350,10 @@ class CosmosApp {
                 throw new Error('Non-200 response');
             }
         } catch (err) {
-            this.statStatus.textContent = 'OFFLINE (Local)';
-            this.statStatus.className = 'badge-val';
+            if (this.statStatus) {
+                this.statStatus.className = 'status-dot offline';
+                this.statStatus.title = 'Offline (Launch server)';
+            }
             this.log('warn', 'C++ backend offline. Launch build/tree_server.exe to sync with C++ server.');
         }
     }
