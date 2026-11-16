@@ -157,34 +157,247 @@ class TreeVisualizer {
     }
 
     /**
-     * Render the complete tree snapshot into the SVG layers.
+     * Render the complete tree snapshot into the SVG layers,
+     * with smooth tween-based position transitions for existing nodes.
      */
     renderTree(treeData) {
         this.currentTree = treeData;
+
+        const emptyState = document.getElementById('empty-state');
+        if (!treeData || !treeData.root) {
+            this.edgesLayer.innerHTML = '';
+            this.nodesLayer.innerHTML = '';
+            this.particlesLayer.innerHTML = '';
+            this.nodeElements.clear();
+            this.edgeElements.clear();
+            this.nodeCoordinates.clear();
+            if (emptyState) emptyState.classList.remove('hidden');
+            return;
+        }
+        if (emptyState) emptyState.classList.add('hidden');
+
+        // Capture old positions before computing new layout
+        const oldPositions = new Map();
+        this.nodeCoordinates.forEach((pos, val) => {
+            oldPositions.set(val, { x: pos.x, y: pos.y });
+        });
+
+        // Compute new layout
+        this.computeLayout(treeData.root);
+        const newPositions = new Map();
+        this.nodeCoordinates.forEach((pos, val) => {
+            newPositions.set(val, { x: pos.x, y: pos.y });
+        });
+
+        // If no old positions exist (first render), just do a plain render
+        if (oldPositions.size === 0) {
+            this.edgesLayer.innerHTML = '';
+            this.nodesLayer.innerHTML = '';
+            this.particlesLayer.innerHTML = '';
+            this.nodeElements.clear();
+            this.edgeElements.clear();
+            this.renderEdges(treeData.root);
+            this.renderNodes(treeData.root);
+            this.centerTree();
+            return;
+        }
+
+        // Otherwise run smooth tween transition
+        this._tweenNodes(oldPositions, newPositions, treeData);
+    }
+
+    /**
+     * Smooth tween-based node position transition.
+     * - Existing nodes: tween from old to new position (easeOutCubic, 600ms)
+     * - New nodes: fade in from parent position
+     * - Removed nodes: fade out to parent position, then remove
+     * - Edges follow nodes every frame
+     */
+    _tweenNodes(oldPositions, newPositions, newTree) {
+        // Helper: collect all nodes from tree into a flat map val->node
+        function collectNodes(node, map) {
+            if (!node) return;
+            map.set(node.value, node);
+            collectNodes(node.left, map);
+            collectNodes(node.right, map);
+        }
+
+        // Build parent map for new tree (child value -> parent position)
+        function buildParentMap(node, parentVal, parentMap) {
+            if (!node) return;
+            if (parentVal !== null) parentMap.set(node.value, parentVal);
+            buildParentMap(node.left, node.value, parentMap);
+            buildParentMap(node.right, node.value, parentMap);
+        }
+
+        const newNodeMap = new Map();
+        collectNodes(newTree.root, newNodeMap);
+        const parentMap = new Map();
+        buildParentMap(newTree.root, null, parentMap);
+
+        const duration = 600;
+        const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
+
+        // Determine sets
+        const existing = []; // in both old and new
+        const added = [];    // only in new
+        const removed = [];  // only in old
+
+        newPositions.forEach((newPos, val) => {
+            if (oldPositions.has(val)) {
+                existing.push(val);
+            } else {
+                added.push(val);
+            }
+        });
+        oldPositions.forEach((oldPos, val) => {
+            if (!newPositions.has(val)) {
+                removed.push(val);
+            }
+        });
+
+        // Build a temporary "working" positions map for edge animation
+        const workingPos = new Map();
+        oldPositions.forEach((p, v) => workingPos.set(v, { x: p.x, y: p.y }));
+
+        // Clear layers and rebuild with starting positions
         this.edgesLayer.innerHTML = '';
         this.nodesLayer.innerHTML = '';
         this.particlesLayer.innerHTML = '';
         this.nodeElements.clear();
         this.edgeElements.clear();
 
-        const emptyState = document.getElementById('empty-state');
-        if (!treeData || !treeData.root) {
-            if (emptyState) emptyState.classList.remove('hidden');
-            return;
-        }
-        if (emptyState) emptyState.classList.add('hidden');
+        // Render all NEW tree nodes at their starting positions (old pos for existing, parent pos for new)
+        const renderStartPos = new Map();
+        existing.forEach(val => renderStartPos.set(val, oldPositions.get(val)));
+        added.forEach(val => {
+            const parentVal = parentMap.get(val);
+            const startPos = (parentVal !== null && oldPositions.has(parentVal))
+                ? oldPositions.get(parentVal)
+                : (parentVal !== null && newPositions.has(parentVal))
+                    ? newPositions.get(parentVal)
+                    : newPositions.get(val);
+            renderStartPos.set(val, startPos);
+        });
 
-        // 1. Compute coordinates
-        this.computeLayout(treeData.root);
+        // Temporarily override nodeCoordinates to draw at start positions
+        const savedCoords = new Map(this.nodeCoordinates);
+        renderStartPos.forEach((pos, val) => {
+            if (this.nodeCoordinates.has(val)) {
+                this.nodeCoordinates.get(val).x = pos.x;
+                this.nodeCoordinates.get(val).y = pos.y;
+            }
+        });
 
-        // 2. Render connecting constellation edges
-        this.renderEdges(treeData.root);
+        this.renderEdges(newTree.root);
+        this.renderNodes(newTree.root);
 
-        // 3. Render celestial star nodes
-        this.renderNodes(treeData.root);
+        // Also render removed nodes at their old positions (they'll fade out)
+        const removedEls = new Map();
+        removed.forEach(val => {
+            // Find parent of removed node in old tree if possible
+            const startPos = oldPositions.get(val);
+            const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            group.setAttribute('class', 'star-group');
+            group.setAttribute('transform', `translate(${startPos.x}, ${startPos.y})`);
+            group.setAttribute('opacity', '1');
+            const corona = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            corona.setAttribute('class', 'star-corona');
+            corona.setAttribute('r', '19');
+            corona.setAttribute('fill', 'url(#plasma-crimson)');
+            const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            txt.setAttribute('class', 'star-key-text');
+            txt.textContent = val;
+            group.appendChild(corona);
+            group.appendChild(txt);
+            this.nodesLayer.appendChild(group);
+            removedEls.set(val, { el: group, startPos: { ...startPos } });
+        });
 
-        // Auto-center on first render
-        this.centerTree();
+        // Restore nodeCoordinates
+        savedCoords.forEach((v, k) => this.nodeCoordinates.set(k, v));
+
+        // Set opacity 0 on newly added nodes
+        added.forEach(val => {
+            const el = this.nodeElements.get(val);
+            if (el) el.setAttribute('opacity', '0');
+        });
+
+        // Animate
+        const startTime = performance.now();
+
+        const animate = (now) => {
+            const elapsed = now - startTime;
+            const rawT = Math.min(elapsed / duration, 1.0);
+            const t = easeOutCubic(rawT);
+
+            // Tween existing nodes
+            existing.forEach(val => {
+                const el = this.nodeElements.get(val);
+                const oldP = oldPositions.get(val);
+                const newP = newPositions.get(val);
+                if (!el || !oldP || !newP) return;
+                const cx = oldP.x + (newP.x - oldP.x) * t;
+                const cy = oldP.y + (newP.y - oldP.y) * t;
+                el.setAttribute('transform', `translate(${cx}, ${cy})`);
+                workingPos.set(val, { x: cx, y: cy });
+            });
+
+            // Fade in added nodes (start from parent pos)
+            added.forEach(val => {
+                const el = this.nodeElements.get(val);
+                const startP = renderStartPos.get(val);
+                const newP = newPositions.get(val);
+                if (!el || !startP || !newP) return;
+                const cx = startP.x + (newP.x - startP.x) * t;
+                const cy = startP.y + (newP.y - startP.y) * t;
+                el.setAttribute('transform', `translate(${cx}, ${cy})`);
+                el.setAttribute('opacity', String(t));
+                workingPos.set(val, { x: cx, y: cy });
+            });
+
+            // Fade out removed nodes toward parent (or just fade in place)
+            removedEls.forEach(({ el, startPos }, val) => {
+                el.setAttribute('opacity', String(1 - t));
+            });
+
+            // Update all edges each frame based on working positions
+            this.edgeElements.forEach((line, key) => {
+                const [fromStr, toStr] = key.split('-');
+                const fromVal = parseInt(fromStr, 10);
+                const toVal = parseInt(toStr, 10);
+                const fp = workingPos.get(fromVal);
+                const tp = workingPos.get(toVal);
+                if (fp) { line.setAttribute('x1', fp.x); line.setAttribute('y1', fp.y); }
+                if (tp) { line.setAttribute('x2', tp.x); line.setAttribute('y2', tp.y); }
+            });
+
+            if (rawT < 1.0) {
+                requestAnimationFrame(animate);
+            } else {
+                // Snap all to final positions, remove faded-out nodes
+                existing.forEach(val => {
+                    const el = this.nodeElements.get(val);
+                    const newP = newPositions.get(val);
+                    if (el && newP) el.setAttribute('transform', `translate(${newP.x}, ${newP.y})`);
+                });
+                added.forEach(val => {
+                    const el = this.nodeElements.get(val);
+                    const newP = newPositions.get(val);
+                    if (el && newP) {
+                        el.setAttribute('transform', `translate(${newP.x}, ${newP.y})`);
+                        el.setAttribute('opacity', '1');
+                    }
+                });
+                removedEls.forEach(({ el }) => el.remove());
+
+                // Update nodeCoordinates to final layout
+                this.computeLayout(newTree.root);
+                this.centerTree();
+            }
+        };
+
+        requestAnimationFrame(animate);
     }
 
     renderEdges(node) {
@@ -433,12 +646,46 @@ class TreeVisualizer {
             requestAnimationFrame(step);
         });
 
-        // Step 4: Flash target text to successor value
+        // Step 4: Flash target text to successor value with scale bounce
         const targetText = targetEl.querySelector('.star-key-text');
         if (targetText) {
-            targetText.textContent = successorVal;
+            // Scale bounce: 0.5 -> 1.5 -> 1.0 over 300ms
+            const bounceDuration = 300 / speedMultiplier;
+            const bounceStart = performance.now();
+            await new Promise(resolve => {
+                function bounceStep(now) {
+                    const bt = Math.min((now - bounceStart) / bounceDuration, 1.0);
+                    let scale;
+                    if (bt < 0.5) {
+                        scale = 0.5 + (1.5 - 0.5) * (bt / 0.5); // 0.5 -> 1.5
+                    } else {
+                        scale = 1.5 + (1.0 - 1.5) * ((bt - 0.5) / 0.5); // 1.5 -> 1.0
+                    }
+                    targetText.setAttribute('transform', `scale(${scale})`);
+                    if (bt < 1.0) {
+                        requestAnimationFrame(bounceStep);
+                    } else {
+                        targetText.setAttribute('transform', '');
+                        resolve();
+                    }
+                }
+                targetText.textContent = successorVal;
+                requestAnimationFrame(bounceStep);
+            });
         }
         if (window.AudioEngine) window.AudioEngine.playSuccess();
+
+        // Flash the target node with bright green pulse
+        const targetCorona = targetEl.querySelector('.star-corona');
+        if (targetCorona) {
+            const origStroke = targetCorona.style.stroke;
+            const origFilter = targetCorona.style.filter;
+            targetCorona.style.stroke = '#39ff14';
+            targetCorona.style.filter = 'drop-shadow(0 0 24px #39ff14)';
+            await new Promise(r => setTimeout(r, 300 / speedMultiplier));
+            targetCorona.style.stroke = origStroke;
+            targetCorona.style.filter = origFilter;
+        }
 
         // Clean up animation elements
         path.remove();
@@ -452,8 +699,8 @@ class TreeVisualizer {
 
     /**
      * Enhanced animation for AVL Rotations:
-     * Draws rotational flux vector, marks unbalanced root and pivot nodes,
-     * and shows directional orbital movement!
+     * Tweens the pivot node's SVG position from old to new, shows a sweeping arc,
+     * then calls renderTree() to snap to true final layout.
      */
     async animateRotation(rotationEvent, speedMultiplier = 1.0) {
         const rootEl = this.nodeElements.get(rotationEvent.rootValue);
@@ -464,6 +711,7 @@ class TreeVisualizer {
         if (rootEl) rootEl.classList.add('rotation-pivot');
         if (pivotEl) pivotEl.classList.add('active-sweep');
 
+        // Draw sweeping arc from root to pivot
         let fluxArc = null;
         if (rootPos && pivotPos) {
             fluxArc = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -477,9 +725,33 @@ class TreeVisualizer {
 
         if (window.AudioEngine) window.AudioEngine.playWarp();
 
-        // Keep highlight and rotation arc visible for comprehension
-        const displayTime = 1400 / speedMultiplier;
-        await new Promise(r => setTimeout(r, displayTime));
+        // Tween the pivot node toward the root's position to simulate the rotation movement
+        if (pivotEl && pivotPos && rootPos) {
+            const tweenDuration = 700 / speedMultiplier;
+            const tweenStart = performance.now();
+            const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
+
+            await new Promise(resolve => {
+                function tweenStep(now) {
+                    const t = easeOutCubic(Math.min((now - tweenStart) / tweenDuration, 1.0));
+                    // Move pivot halfway toward root to visually suggest it's rising
+                    const cx = pivotPos.x + (rootPos.x - pivotPos.x) * t * 0.5;
+                    const cy = pivotPos.y + (rootPos.y - pivotPos.y) * t * 0.5;
+                    pivotEl.setAttribute('transform', `translate(${cx}, ${cy})`);
+                    if (t < 1.0) {
+                        requestAnimationFrame(tweenStep);
+                    } else {
+                        resolve();
+                    }
+                }
+                requestAnimationFrame(tweenStep);
+            });
+        } else {
+            // Fallback: just wait
+            await new Promise(r => setTimeout(r, 700 / speedMultiplier));
+        }
+
+        await new Promise(r => setTimeout(r, 300 / speedMultiplier));
 
         if (fluxArc) fluxArc.remove();
         if (rootEl) rootEl.classList.remove('rotation-pivot');
@@ -515,6 +787,58 @@ class TreeVisualizer {
         }
 
         if (window.AudioEngine) window.AudioEngine.playSuccess();
+    }
+
+    /**
+     * Animate a single splay step.
+     * step = { type: "ZigZig", accessedValue: 10, newRootValue: 20, description: "..." }
+     * - Highlights the accessed node in neon yellow (splay-step class) for 400ms
+     * - Then briefly highlights the new root in neon green pulse (splay-new-root class)
+     * - Optionally draws a brief arc between them
+     * - Total duration ~600-800ms
+     */
+    async animateSplayStep(step, speedMultiplier = 1.0) {
+        const accessedEl = this.nodeElements.get(step.accessedValue);
+        const newRootEl = this.nodeElements.get(step.newRootValue);
+        const accessedPos = this.nodeCoordinates.get(step.accessedValue);
+        const newRootPos = this.nodeCoordinates.get(step.newRootValue);
+
+        // 1. Highlight accessed node in purple (splay-step)
+        if (accessedEl) {
+            accessedEl.classList.add('splay-step');
+            if (window.AudioEngine) window.AudioEngine.playNodeHover(step.accessedValue);
+        }
+
+        // Draw brief arc if both positions available
+        let arc = null;
+        if (accessedPos && newRootPos && accessedEl && newRootEl) {
+            arc = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            const midX = (accessedPos.x + newRootPos.x) / 2;
+            const midY = Math.min(accessedPos.y, newRootPos.y) - 30;
+            arc.setAttribute('d', `M ${accessedPos.x} ${accessedPos.y} Q ${midX} ${midY} ${newRootPos.x} ${newRootPos.y}`);
+            arc.setAttribute('fill', 'none');
+            arc.setAttribute('stroke', '#bd00ff');
+            arc.setAttribute('stroke-width', '2');
+            arc.setAttribute('stroke-dasharray', '5 3');
+            arc.setAttribute('opacity', '0.75');
+            arc.setAttribute('style', 'filter: drop-shadow(0 0 8px #bd00ff);');
+            this.particlesLayer.appendChild(arc);
+        }
+
+        await new Promise(r => setTimeout(r, 400 / speedMultiplier));
+
+        // 2. Remove accessed highlight, add new-root pulse
+        if (accessedEl) accessedEl.classList.remove('splay-step');
+        if (newRootEl) {
+            newRootEl.classList.add('splay-new-root');
+            if (window.AudioEngine) window.AudioEngine.playNodeHover(step.newRootValue);
+        }
+
+        await new Promise(r => setTimeout(r, 300 / speedMultiplier));
+
+        // 3. Clean up
+        if (newRootEl) newRootEl.classList.remove('splay-new-root');
+        if (arc) arc.remove();
     }
 }
 

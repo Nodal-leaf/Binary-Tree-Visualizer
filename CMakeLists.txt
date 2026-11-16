@@ -22,6 +22,7 @@ add_library(TreeModels STATIC
     models/BinarySearchTree.cpp
     models/BST.cpp
     models/AVLTree.cpp
+    models/SplayTree.cpp
 )
 
 target_include_directories(TreeModels PUBLIC

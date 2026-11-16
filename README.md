@@ -85,6 +85,22 @@ classDiagram
         +toJson() json
     }
 
+    class SplayTree {
+        -vector~SplayStep~ lastSplaySteps_
+        -rotateRight(Node*) Node*
+        -rotateLeft(Node*) Node*
+        -splay(Node*, int) Node*
+        -findMax(Node*) Node*
+        -updateHeight(Node*) void
+        +insert(int) bool
+        +remove(int) bool
+        +search(int) bool
+        +getTreeType() string
+        +getLastSplaySteps() vector~SplayStep~
+        +clearLastSplaySteps() void
+        +toJson() json
+    }
+
     class TreeService {
         -unique_ptr~BinarySearchTree~ currentTree_
         -mutex mutex_
@@ -109,6 +125,7 @@ classDiagram
     BinarySearchTree "1" *-- "0..1" Node : root_
     BinarySearchTree <|-- BST : Inheritance
     BinarySearchTree <|-- AVLTree : Inheritance
+    BinarySearchTree <|-- SplayTree : Inheritance
     TreeService "1" *-- "1" BinarySearchTree : polymorphic ownership
     TreeController "1" o-- "1" TreeService : dependency injection
 ```
@@ -162,6 +179,18 @@ Concrete subclass inheriting from `BinarySearchTree` implementing Adelson-Velsky
   - **RL Rotation (`rotateRightLeft`)**: Double rotation (right on child, left on root).
 - **Nested Telemetry Structure (`RotationStep`)**: Logs rotation metadata (type, pivot, root, grandchild, direction, human-readable rationale, and before/after tree snapshots) so the frontend can orchestrate step-by-step visual balancing morphs.
 
+#### [`SplayTree`](models/SplayTree.h) — Concrete Self-Adjusting Tree
+Concrete subclass inheriting from `BinarySearchTree` implementing Sleator & Tarjan self-adjusting Splay Trees.
+- **Self-Adjusting Property**: Every access (`insert`, `search`, `remove`) splays the accessed node to the root, guaranteeing amortized $O(\log n)$ time per operation.
+- **Splay Operations**:
+  - **Zig**: Single right rotation (target is left child of root).
+  - **Zag**: Single left rotation (target is right child of root).
+  - **Zig-Zig**: Two right rotations (target and parent are both left children).
+  - **Zag-Zag**: Two left rotations (target and parent are both right children).
+  - **Zig-Zag**: Left rotation on child, then right rotation on root (target is right child, parent is left child).
+  - **Zag-Zig**: Right rotation on child, then left rotation on root (target is left child, parent is right child).
+- **Nested Telemetry Structure (`SplayStep`)**: Logs step-by-step splay history (step type, accessed value, new root value, and human-readable description) for real-time frontend animation.
+
 ---
 
 ### 2. Service & Controller Classes (`services/` & `controllers/`)
@@ -212,7 +241,7 @@ Handles HTTP networking, request deserialization, input validation, and response
 | `POST` | `/api/insert` | Inserts a node `{ "value": 42 }`, performing rotations if AVL. |
 | `POST` | `/api/delete` | Deletes a node `{ "value": 42 }`, performing swaps and rebalancing. |
 | `GET` | `/api/search?value=42` | Searches for key and returns the exact ordered search path for animation. |
-| `POST` | `/api/tree/type` | Switches active tree variant `{ "type": "BST" \| "AVL", "preserve": true }`. |
+| `POST` | `/api/tree/type` | Switches active tree variant `{ "type": "BST" \| "AVL" \| "SPLAY", "preserve": true }`. |
 | `GET` | `/api/traversal/:type` | Returns ordered traversal array for `inorder`, `preorder`, or `postorder`. |
 | `POST` | `/api/sample` | Resets and loads a pre-populated balanced sample tree. |
 | `POST` | `/api/clear` | Clears all nodes from the tree. |

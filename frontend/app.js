@@ -153,6 +153,7 @@ class CosmosApp {
         // Mode switchers
         this.modeBst = document.getElementById('mode-bst');
         this.modeAvl = document.getElementById('mode-avl');
+        this.modeSplay = document.getElementById('mode-splay');
 
         // View controls
         this.btnZoomIn = document.getElementById('btn-zoom-in');
@@ -206,6 +207,7 @@ class CosmosApp {
         // Mode switch
         this.modeBst.addEventListener('click', () => this.setMode('BST'));
         this.modeAvl.addEventListener('click', () => this.setMode('AVL'));
+        this.modeSplay.addEventListener('click', () => this.setMode('SPLAY'));
 
         // Viewport controls
         this.btnZoomIn.addEventListener('click', () => this.visualizer.zoomIn());
@@ -256,7 +258,7 @@ class CosmosApp {
         this.isBusy = busy;
         const buttons = [
             this.btnInsert, this.btnDelete, this.btnSearch, 
-            this.btnSample, this.btnClear, this.modeBst, this.modeAvl
+            this.btnSample, this.btnClear, this.modeBst, this.modeAvl, this.modeSplay
         ];
         buttons.forEach(b => {
             if (b) b.disabled = busy;
@@ -270,12 +272,17 @@ class CosmosApp {
 
         if (treeData.treeType) {
             this.currentMode = treeData.treeType;
+            // Clear all active states first
+            [this.modeBst, this.modeAvl, this.modeSplay].forEach(btn => {
+                if (btn) btn.classList.remove('active');
+            });
             if (this.currentMode === 'BST') {
-                this.modeBst.classList.add('active');
-                this.modeAvl.classList.remove('active');
+                if (this.modeBst) this.modeBst.classList.add('active');
+            } else if (this.currentMode === 'SPLAY') {
+                if (this.modeSplay) this.modeSplay.classList.add('active');
             } else {
-                this.modeAvl.classList.add('active');
-                this.modeBst.classList.remove('active');
+                // AVL (or default)
+                if (this.modeAvl) this.modeAvl.classList.add('active');
             }
         }
     }
@@ -286,6 +293,14 @@ class CosmosApp {
         const rot = rotations[rotations.length - 1]; // latest rotation
         this.warpTitle.textContent = `${rot.type} ROTATION`;
         this.warpDesc.textContent = rot.description;
+
+        // Reset badge to AVL style
+        const badge = document.getElementById('warp-badge');
+        if (badge) {
+            badge.textContent = 'AVL REBALANCE';
+            badge.className = 'toast-badge';
+        }
+
         this.warpBanner.classList.remove('hidden');
 
         this.log('warp', `[GRAVITATIONAL WARP] ${rot.description}`);
@@ -293,6 +308,28 @@ class CosmosApp {
         setTimeout(() => {
             this.warpBanner.classList.add('hidden');
         }, 3200);
+    }
+
+    showSplayBanner(steps) {
+        if (!steps || steps.length === 0) return;
+
+        const step = steps[steps.length - 1];
+        this.warpTitle.textContent = step.type.toUpperCase();
+        this.warpDesc.textContent = step.description || '';
+
+        const badge = document.getElementById('warp-badge');
+        if (badge) {
+            badge.textContent = 'SPLAY STEP';
+            badge.className = 'toast-badge splay-badge';
+        }
+
+        this.warpBanner.classList.remove('hidden');
+        this.log('info', `[SPLAY] ${step.type}: ${step.description}`);
+
+        clearTimeout(this._splayBannerTimer);
+        this._splayBannerTimer = setTimeout(() => {
+            this.warpBanner.classList.add('hidden');
+        }, 2000);
     }
 
     showNodeTelemetry(node) {
@@ -400,6 +437,16 @@ class CosmosApp {
                         await this.visualizer.animateRotation(rot, this.speedMultiplier);
                     }
                 }
+
+                // Step 4: If Splay rebalancing occurred, animate splay steps
+                const splaySteps = data.splaySteps || (data.tree && data.tree.lastSplaySteps);
+                if (splaySteps && splaySteps.length > 0) {
+                    this.showSplayBanner(splaySteps);
+                    for (const step of splaySteps) {
+                        await this.visualizer.animateSplayStep(step, this.speedMultiplier);
+                    }
+                }
+
                 this.log('success', data.message);
                 this.inputVal.value = '';
             } else {
@@ -453,6 +500,15 @@ class CosmosApp {
                     }
                 }
 
+                // Step 5: If Splay rebalancing occurred, animate splay steps
+                const splaySteps = data.splaySteps || (data.tree && data.tree.lastSplaySteps);
+                if (splaySteps && splaySteps.length > 0) {
+                    this.showSplayBanner(splaySteps);
+                    for (const step of splaySteps) {
+                        await this.visualizer.animateSplayStep(step, this.speedMultiplier);
+                    }
+                }
+
                 this.log('success', data.message);
                 this.inputVal.value = '';
             } else {
@@ -483,6 +539,19 @@ class CosmosApp {
             const data = await res.json();
             if (data.path && data.path.length > 0) {
                 await this.visualizer.animateSearchPath(data.path, data.found, this.speedMultiplier);
+            }
+
+            // Splay Tree: search reorganizes the tree, moving the accessed node to root
+            const splaySteps = data.splaySteps || (data.tree && data.tree.lastSplaySteps);
+            if (splaySteps && splaySteps.length > 0) {
+                this.showSplayBanner(splaySteps);
+                if (data.tree) {
+                    this.visualizer.renderTree(data.tree);
+                    this.updateTelemetry(data.tree);
+                }
+                for (const step of splaySteps) {
+                    await this.visualizer.animateSplayStep(step, this.speedMultiplier);
+                }
             }
 
             if (data.found) {

@@ -18,6 +18,8 @@ void TreeService::rebuildAsType(const std::string& targetType) {
 
     if (targetType == "BST") {
         currentTree_ = std::make_unique<BST>();
+    } else if (targetType == "SPLAY") {
+        currentTree_ = std::make_unique<SplayTree>();
     } else {
         currentTree_ = std::make_unique<AVLTree>();
     }
@@ -30,12 +32,16 @@ void TreeService::rebuildAsType(const std::string& targetType) {
 nlohmann::json TreeService::switchTreeType(const std::string& treeType, bool preserveData) {
     std::lock_guard<std::mutex> lock(mutex_);
 
-    std::string normalized = (treeType == "BST" || treeType == "bst") ? "BST" : "AVL";
+    std::string normalized = (treeType == "BST" || treeType == "bst") ? "BST"
+                           : (treeType == "SPLAY" || treeType == "splay") ? "SPLAY"
+                           : "AVL";
     if (preserveData) {
         rebuildAsType(normalized);
     } else {
         if (normalized == "BST") {
             currentTree_ = std::make_unique<BST>();
+        } else if (normalized == "SPLAY") {
+            currentTree_ = std::make_unique<SplayTree>();
         } else {
             currentTree_ = std::make_unique<AVLTree>();
         }
@@ -67,6 +73,16 @@ nlohmann::json TreeService::insertValue(int value) {
         res["message"] = "Value " + std::to_string(value) + " already exists in the tree.";
     }
     res["tree"] = currentTree_->toJson();
+
+    // Attach splay steps if the active tree is a SplayTree
+    if (auto* splay = dynamic_cast<SplayTree*>(currentTree_.get())) {
+        nlohmann::json stepsJson = nlohmann::json::array();
+        for (const auto& s : splay->getLastSplaySteps()) {
+            stepsJson.push_back(s.toJson());
+        }
+        res["splaySteps"] = stepsJson;
+    }
+
     return res;
 }
 
@@ -87,6 +103,16 @@ nlohmann::json TreeService::removeValue(int value) {
         res["message"] = "Value " + std::to_string(value) + " not found in the tree.";
     }
     res["tree"] = currentTree_->toJson();
+
+    // Attach splay steps if the active tree is a SplayTree
+    if (auto* splay = dynamic_cast<SplayTree*>(currentTree_.get())) {
+        nlohmann::json stepsJson = nlohmann::json::array();
+        for (const auto& s : splay->getLastSplaySteps()) {
+            stepsJson.push_back(s.toJson());
+        }
+        res["splaySteps"] = stepsJson;
+    }
+
     return res;
 }
 
@@ -107,6 +133,18 @@ nlohmann::json TreeService::searchValue(int value) const {
     } else {
         res["message"] = "Value " + std::to_string(value) + " not found.";
     }
+
+    // Attach splay steps if the active tree is a SplayTree
+    if (auto* splay = dynamic_cast<SplayTree*>(currentTree_.get())) {
+        nlohmann::json stepsJson = nlohmann::json::array();
+        for (const auto& s : splay->getLastSplaySteps()) {
+            stepsJson.push_back(s.toJson());
+        }
+        res["splaySteps"] = stepsJson;
+        // Also include updated tree state (splay modifies the tree on search)
+        res["tree"] = currentTree_->toJson();
+    }
+
     return res;
 }
 

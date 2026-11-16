@@ -4,6 +4,7 @@
 #include "../models/BinarySearchTree.h"
 #include "../models/BST.h"
 #include "../models/AVLTree.h"
+#include "../models/SplayTree.h"
 #include <memory>
 #include <mutex>
 #include <string>

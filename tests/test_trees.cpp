@@ -7,6 +7,7 @@
 #include "../models/BinarySearchTree.h"
 #include "../models/BST.h"
 #include "../models/AVLTree.h"
+#include "../models/SplayTree.h"
 
 // ANSI colors for clean test reporting
 #define GREEN "\033[32m"
@@ -236,9 +237,59 @@ void testPolymorphismAndAbstraction() {
               << ", AVL height = " << trees[1]->getHeight() << RESET << std::endl;
 }
 
+void testSplayTree() {
+    std::cout << CYAN << "Running Test: Splay Tree Operations (Insert, Search, Delete, Splay steps)..." << RESET << std::endl;
+    SplayTree splay;
+    assert(splay.getTreeType() == "SPLAY");
+    assert(splay.isEmpty());
+
+    // Insert elements
+    splay.insert(10);
+    assert(splay.getRoot()->getValue() == 10);
+
+    splay.insert(20);
+    assert(splay.getRoot()->getValue() == 20);
+
+    splay.insert(5);
+    assert(splay.getRoot()->getValue() == 5);
+
+    splay.insert(15);
+    assert(splay.getRoot()->getValue() == 15);
+
+    splay.insert(25);
+    assert(splay.getRoot()->getValue() == 25);
+    assert(splay.getNodeCount() == 5);
+
+    // Search brings accessed element to root
+    bool found = splay.search(5);
+    assert(found);
+    assert(splay.getRoot()->getValue() == 5);
+
+    // Search missing element splays closest visited node
+    bool foundMissing = splay.search(12);
+    assert(!foundMissing);
+    assert(splay.getRoot() != nullptr);
+
+    // Delete
+    bool removed = splay.remove(15);
+    assert(removed);
+    assert(splay.getNodeCount() == 4);
+    assert(!splay.search(15));
+
+    // Splay steps telemetry
+    assert(!splay.getLastSplaySteps().empty());
+
+    // Serialization
+    nlohmann::json j = splay.toJson();
+    assert(j["treeType"] == "SPLAY");
+    assert(j.contains("lastSplaySteps"));
+
+    std::cout << GREEN << "✓ Splay Tree Operations & Splay Steps verified." << RESET << std::endl;
+}
+
 int main() {
     std::cout << YELLOW << "========================================" << RESET << std::endl;
-    std::cout << YELLOW << "   BST & AVL TREE OOP CORE TEST SUITE   " << RESET << std::endl;
+    std::cout << YELLOW << "  BST, AVL & SPLAY OOP TEST SUITE       " << RESET << std::endl;
     std::cout << YELLOW << "========================================" << RESET << std::endl;
 
     try {
@@ -250,6 +301,7 @@ int main() {
         testAVLRLRotations();
         testAVLComplexSequenceAndDeletion();
         testPolymorphismAndAbstraction();
+        testSplayTree();
 
         std::cout << YELLOW << "========================================" << RESET << std::endl;
         std::cout << GREEN << " ALL OOP UNIT TESTS PASSED SUCCESSFULLY! " << RESET << std::endl;

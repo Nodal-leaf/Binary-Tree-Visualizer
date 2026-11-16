@@ -16,6 +16,7 @@
         <div class="btn-group mode-group">
             <button id="mode-bst" class="btn mode-btn" data-mode="BST">BST</button>
             <button id="mode-avl" class="btn mode-btn active" data-mode="AVL">AVL</button>
+            <button id="mode-splay" class="btn mode-btn" data-mode="SPLAY">Splay</button>
         </div>
 
         <div class="divider"></div>
@@ -132,9 +133,9 @@
         <button id="btn-zoom-out" class="ctrl-btn" title="Zoom Out">−</button>
     </div>
 
-    <!-- Minimal Toast Notification for Rotations -->
+    <!-- Minimal Toast Notification for Rotations / Splay Steps -->
     <div id="warp-banner" class="minimal-toast hidden">
-        <span class="toast-badge">AVL REBALANCE</span>
+        <span class="toast-badge" id="warp-badge">AVL REBALANCE</span>
         <div class="toast-text">
             <span id="warp-title" class="toast-title">RR ROTATION</span>
             <span id="warp-desc" class="toast-desc">Node 30 rotated</span>

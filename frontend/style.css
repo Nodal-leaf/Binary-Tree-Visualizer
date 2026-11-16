@@ -263,7 +263,7 @@ body {
 /* Node Group */
 .star-group {
     cursor: pointer;
-    transition: transform 0.2s ease;
+    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 /* Outer Orbital Ring */
@@ -395,6 +395,46 @@ body {
     stroke-width: 2.5px;
     stroke-dasharray: 5 3;
     filter: drop-shadow(0 0 10px var(--neon-yellow));
+}
+
+/* ==========================================================================
+   SPLAY TREE STYLES
+   ========================================================================== */
+
+/* Splay mode active button — neon purple */
+.mode-btn[data-mode="SPLAY"].active {
+    background: #bd00ff;
+    color: #000;
+    border-color: #bd00ff;
+    box-shadow: 0 0 15px rgba(189, 0, 255, 0.75);
+    font-weight: 700;
+}
+
+/* Splay step accessed node highlight */
+.star-group.splay-step .star-corona {
+    stroke: #bd00ff;
+    filter: drop-shadow(0 0 16px #bd00ff);
+}
+
+.star-group.splay-step .star-key-text {
+    fill: #bd00ff;
+}
+
+/* Splay new-root node green pulse */
+.star-group.splay-new-root .star-corona {
+    stroke: #39ff14;
+    animation: newRootPulse 0.5s ease;
+}
+
+@keyframes newRootPulse {
+    0%, 100% { r: 19px; }
+    50%       { r: 24px; }
+}
+
+/* Splay toast badge — purple */
+.toast-badge.splay-badge {
+    background: #bd00ff;
+    color: #000000;
 }
 
 /* ==========================================================================
