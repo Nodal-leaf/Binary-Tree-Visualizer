@@ -1,5 +1,5 @@
-# Chrono-Cosmos Universal Entry-Point Script (PowerShell)
-# Usage: .\run.ps1
+
+
 
 $ErrorActionPreference = "Stop"
 Set-Location -Path $PSScriptRoot
@@ -11,7 +11,7 @@ Write-Host ""
 
 $serverExe = Join-Path $PSScriptRoot "build\tree_server.exe"
 
-# 1. Build server if missing
+
 if (-not (Test-Path $serverExe)) {
     Write-Host "[1/3] Server binary not found. Building with CMake and Ninja..." -ForegroundColor Yellow
     $cmakePath = "C:\msys64\ucrt64\bin\cmake.exe"
@@ -32,11 +32,11 @@ if (-not (Test-Path $serverExe)) {
     }
 }
 
-# 2. Start C++ backend process
+
 Write-Host "[2/3] Launching C++ Backend Server on http://127.0.0.1:8080..." -ForegroundColor Green
 $serverProcess = Start-Process -FilePath $serverExe -ArgumentList "8080" -PassThru -NoNewWindow
 
-# 3. Open browser
+
 Start-Sleep -Seconds 1
 Write-Host "[3/3] Opening Interstellar Frontend in your default browser..." -ForegroundColor Green
 Start-Process "http://127.0.0.1:8080"
@@ -49,7 +49,7 @@ Write-Host "========================================================" -Foregroun
 Write-Host ""
 
 try {
-    # Keep script running and forward server logs
+
     $serverProcess.WaitForExit()
 } finally {
     if (-not $serverProcess.HasExited) {

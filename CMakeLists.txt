@@ -4,11 +4,11 @@ project(TreeSimulation VERSION 1.0.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Find or include nlohmann/json
+
 find_package(nlohmann_json 3.2.0 QUIET)
 find_package(Threads REQUIRED)
 
-# Include directories
+
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/models
@@ -16,7 +16,7 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/controllers
 )
 
-# 1. Core tree models library
+
 add_library(TreeModels STATIC
     models/Node.cpp
     models/BinarySearchTree.cpp
@@ -33,7 +33,7 @@ if (TARGET nlohmann_json::nlohmann_json)
     target_link_libraries(TreeModels PUBLIC nlohmann_json::nlohmann_json)
 endif()
 
-# 2. Services and Controllers library
+
 add_library(TreeBackend STATIC
     services/TreeService.cpp
     controllers/TreeController.cpp
@@ -44,7 +44,7 @@ if (WIN32)
     target_link_libraries(TreeBackend PUBLIC ws2_32 crypt32)
 endif()
 
-# 3. Backend HTTP Server executable
+
 add_executable(tree_server
     server_main.cpp
 )
@@ -54,7 +54,7 @@ if (WIN32)
     target_link_libraries(tree_server PRIVATE ws2_32 crypt32)
 endif()
 
-# 4. Unit tests executable
+
 add_executable(test_trees
     tests/test_trees.cpp
 )

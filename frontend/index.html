@@ -10,9 +10,9 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Minimalist Floating Control Bar -->
+
     <header class="control-bar">
-        <!-- Tree Mode Toggle -->
+
         <div class="btn-group mode-group">
             <button id="mode-bst" class="btn mode-btn" data-mode="BST">BST</button>
             <button id="mode-avl" class="btn mode-btn active" data-mode="AVL">AVL</button>
@@ -21,7 +21,7 @@
 
         <div class="divider"></div>
 
-        <!-- Operations Group -->
+
         <div class="action-group">
             <input type="number" id="node-value-input" placeholder="Value" min="1" max="999" autocomplete="off">
             <button id="btn-insert" class="btn btn-primary" title="Insert Node">Insert</button>
@@ -34,7 +34,7 @@
 
         <div class="divider"></div>
 
-        <!-- Traversals -->
+
         <div class="btn-group traversal-group">
             <button class="btn traversal-btn" data-traversal="inorder" title="Inorder Traversal">Inorder</button>
             <button class="btn traversal-btn" data-traversal="preorder" title="Preorder Traversal">Preorder</button>
@@ -43,7 +43,7 @@
 
         <div class="divider"></div>
 
-        <!-- Telemetry & Status -->
+
         <div class="stats-group">
             <span class="stat-pill">Nodes: <b id="stat-nodes">0</b></span>
             <span class="stat-pill">Height: <b id="stat-height">0</b></span>
@@ -51,11 +51,11 @@
         </div>
     </header>
 
-    <!-- Fullscreen SVG Canvas Container -->
+
     <main id="svg-container">
         <svg id="tree-svg" width="100%" height="100%">
             <defs>
-                <!-- Neon Green Glow Filters -->
+
                 <filter id="neon-glow" x="-50%" y="-50%" width="200%" height="200%">
                     <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur1" />
                     <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur2" />
@@ -74,7 +74,7 @@
                     </feMerge>
                 </filter>
 
-                <!-- Radial Gradients for Neon Nodes -->
+
                 <radialGradient id="plasma-green" cx="50%" cy="50%" r="50%">
                     <stop offset="0%" stop-color="#39ff14" stop-opacity="0.25" />
                     <stop offset="55%" stop-color="#00ff66" stop-opacity="0.1" />
@@ -111,7 +111,7 @@
                 </linearGradient>
             </defs>
 
-            <!-- Transformed Viewport Layer -->
+
             <g id="viewport-group">
                 <g id="edges-layer"></g>
                 <g id="nodes-layer"></g>
@@ -119,21 +119,21 @@
             </g>
         </svg>
 
-        <!-- Minimal Empty State Prompt -->
+
         <div id="empty-state" class="empty-state hidden">
             <span class="empty-glow">✧</span>
             <p>Tree is empty. Insert a value or click Sample.</p>
         </div>
     </main>
 
-    <!-- Floating Minimal Viewport Controls (Bottom-Right) -->
+
     <div class="viewport-controls">
         <button id="btn-zoom-in" class="ctrl-btn" title="Zoom In">+</button>
         <button id="btn-zoom-reset" class="ctrl-btn" title="Reset View">⛶</button>
         <button id="btn-zoom-out" class="ctrl-btn" title="Zoom Out">−</button>
     </div>
 
-    <!-- Minimal Toast Notification for Rotations / Splay Steps -->
+
     <div id="warp-banner" class="minimal-toast hidden">
         <span class="toast-badge" id="warp-badge">AVL REBALANCE</span>
         <div class="toast-text">
@@ -142,17 +142,17 @@
         </div>
     </div>
 
-    <!-- Minimal Floating Traversal Sequence Bar -->
+
     <div id="traversal-display" class="minimal-traversal-bar hidden">
         <span id="traversal-title" class="traversal-title">INORDER:</span>
         <div id="traversal-chips" class="traversal-chips"></div>
         <button id="btn-close-traversal" class="close-btn" title="Close">✕</button>
     </div>
 
-    <!-- Minimal Node Details Card (Bottom-Left popup when node is clicked) -->
+
     <div id="selected-node-card" class="minimal-node-card hidden"></div>
 
-    <!-- Hidden compatibility elements required by app.js -->
+
     <div style="display:none;" aria-hidden="true">
         <div id="mission-log"></div>
         <button id="btn-clear-log"></button>
@@ -161,7 +161,7 @@
         <input type="checkbox" id="audio-toggle" checked>
     </div>
 
-    <!-- Scripts -->
+
     <script src="tree-visualizer.js"></script>
     <script src="app.js"></script>
 </body>

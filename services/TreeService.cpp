@@ -12,7 +12,7 @@ TreeService::TreeService(const std::string& initialType) {
 void TreeService::rebuildAsType(const std::string& targetType) {
     std::vector<int> existingValues;
     if (currentTree_) {
-        // Use preorder traversal to preserve natural insertion order
+
         existingValues = currentTree_->preorder();
     }
 
@@ -57,7 +57,7 @@ nlohmann::json TreeService::switchTreeType(const std::string& treeType, bool pre
 nlohmann::json TreeService::insertValue(int value) {
     std::lock_guard<std::mutex> lock(mutex_);
 
-    // Capture comparison path for GUI animation
+
     std::vector<int> path = currentTree_->getSearchPath(value);
 
     bool inserted = currentTree_->insert(value);
@@ -74,7 +74,7 @@ nlohmann::json TreeService::insertValue(int value) {
     }
     res["tree"] = currentTree_->toJson();
 
-    // Attach splay steps if the active tree is a SplayTree
+
     if (auto* splay = dynamic_cast<SplayTree*>(currentTree_.get())) {
         nlohmann::json stepsJson = nlohmann::json::array();
         for (const auto& s : splay->getLastSplaySteps()) {
@@ -104,7 +104,7 @@ nlohmann::json TreeService::removeValue(int value) {
     }
     res["tree"] = currentTree_->toJson();
 
-    // Attach splay steps if the active tree is a SplayTree
+
     if (auto* splay = dynamic_cast<SplayTree*>(currentTree_.get())) {
         nlohmann::json stepsJson = nlohmann::json::array();
         for (const auto& s : splay->getLastSplaySteps()) {
@@ -134,14 +134,14 @@ nlohmann::json TreeService::searchValue(int value) const {
         res["message"] = "Value " + std::to_string(value) + " not found.";
     }
 
-    // Attach splay steps if the active tree is a SplayTree
+
     if (auto* splay = dynamic_cast<SplayTree*>(currentTree_.get())) {
         nlohmann::json stepsJson = nlohmann::json::array();
         for (const auto& s : splay->getLastSplaySteps()) {
             stepsJson.push_back(s.toJson());
         }
         res["splaySteps"] = stepsJson;
-        // Also include updated tree state (splay modifies the tree on search)
+
         res["tree"] = currentTree_->toJson();
     }
 

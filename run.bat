@@ -8,7 +8,7 @@ echo    CHRONO-COSMOS // TREE SIMULATION LAUNCHER
 echo ========================================================
 echo.
 
-:: Check if build\tree_server.exe exists, if not build it
+:
 if not exist "build\tree_server.exe" (
     echo [1/3] Server binary not found. Building with CMake and Ninja...
     if exist "C:\msys64\ucrt64\bin\cmake.exe" (
@@ -41,6 +41,6 @@ echo   Press CTRL+C or close this window to exit.
 echo ========================================================
 echo.
 
-:: Keep script alive until user exits
+:
 cmd /k
 

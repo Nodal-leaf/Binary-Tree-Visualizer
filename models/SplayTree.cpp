@@ -2,15 +2,15 @@
 #include <algorithm>
 #include <string>
 
-// ---------------------------------------------------------------------------
-// Constructor
-// ---------------------------------------------------------------------------
+
+
+
 
 SplayTree::SplayTree() : BinarySearchTree() {}
 
-// ---------------------------------------------------------------------------
-// Private helpers
-// ---------------------------------------------------------------------------
+
+
+
 
 void SplayTree::updateHeight(Node* node) {
     if (node != nullptr) {
@@ -29,7 +29,7 @@ Node* SplayTree::rotateRight(Node* y) {
     updateHeight(y);
     updateHeight(x);
 
-    return x;  // new sub-tree root
+    return x;
 }
 
 Node* SplayTree::rotateLeft(Node* x) {
@@ -42,7 +42,7 @@ Node* SplayTree::rotateLeft(Node* x) {
     updateHeight(x);
     updateHeight(y);
 
-    return y;  // new sub-tree root
+    return y;
 }
 
 Node* SplayTree::findMax(Node* node) const {
@@ -52,20 +52,20 @@ Node* SplayTree::findMax(Node* node) const {
     return node;
 }
 
-// ---------------------------------------------------------------------------
-// splay() – recursive bottom-up implementation.
-//
-// Brings the node containing `key` (or the closest ancestor when missing) to
-// the root of the subtree.  Every meaningful rotation is logged as a SplayStep.
-//
-// Cases handled:
-//   Zig      – key == root->left->value  (single right rotation)
-//   Zag      – key == root->right->value (single left rotation)
-//   Zig-Zig  – key < root->left->value   (two right rotations)
-//   Zag-Zag  – key > root->right->value  (two left rotations)
-//   Zig-Zag  – key in root->left->right  (left rot on child, right rot on root)
-//   Zag-Zig  – key in root->right->left  (right rot on child, left rot on root)
-// ---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 Node* SplayTree::splay(Node* root, int key) {
     if (root == nullptr || root->getValue() == key) {
@@ -73,21 +73,21 @@ Node* SplayTree::splay(Node* root, int key) {
     }
 
     if (key < root->getValue()) {
-        // Key is in LEFT subtree
+
         if (root->getLeft() == nullptr) {
-            // Key absent; closest ancestor is root
+
             return root;
         }
 
         if (key < root->getLeft()->getValue()) {
-            // ---- Zig-Zig (Left-Left): target and parent are both left children ----
-            // Recurse into left-left grandchild first
+
+
             root->getLeft()->setLeft(splay(root->getLeft()->getLeft(), key));
 
-            // First rotation (root right)
+
             root = rotateRight(root);
 
-            // Second rotation (if left child still exists)
+
             if (root->getLeft() != nullptr) {
                 root = rotateRight(root);
             }
@@ -101,16 +101,16 @@ Node* SplayTree::splay(Node* root, int key) {
             lastSplaySteps_.push_back(step);
 
         } else if (key > root->getLeft()->getValue()) {
-            // ---- Zig-Zag (Left-Right): target is right child of left child ----
-            // Recurse into left-right grandchild first
+
+
             root->getLeft()->setRight(splay(root->getLeft()->getRight(), key));
 
-            // First rotation: left-rotate the left child
+
             if (root->getLeft()->getRight() != nullptr) {
                 root->setLeft(rotateLeft(root->getLeft()));
             }
 
-            // Second rotation: right-rotate the root
+
             root = (root->getLeft() != nullptr) ? rotateRight(root) : root;
 
             SplayStep step;
@@ -122,7 +122,7 @@ Node* SplayTree::splay(Node* root, int key) {
             lastSplaySteps_.push_back(step);
 
         } else {
-            // ---- Zig: key == root->left->value (target is direct left child) ----
+
             root = rotateRight(root);
 
             SplayStep step;
@@ -135,14 +135,14 @@ Node* SplayTree::splay(Node* root, int key) {
         }
 
     } else {
-        // Key is in RIGHT subtree
+
         if (root->getRight() == nullptr) {
-            // Key absent; closest ancestor is root
+
             return root;
         }
 
         if (key > root->getRight()->getValue()) {
-            // ---- Zag-Zag (Right-Right): target and parent are both right children ----
+
             root->getRight()->setRight(splay(root->getRight()->getRight(), key));
 
             root = rotateLeft(root);
@@ -160,7 +160,7 @@ Node* SplayTree::splay(Node* root, int key) {
             lastSplaySteps_.push_back(step);
 
         } else if (key < root->getRight()->getValue()) {
-            // ---- Zag-Zig (Right-Left): target is left child of right child ----
+
             root->getRight()->setLeft(splay(root->getRight()->getLeft(), key));
 
             if (root->getRight()->getLeft() != nullptr) {
@@ -178,7 +178,7 @@ Node* SplayTree::splay(Node* root, int key) {
             lastSplaySteps_.push_back(step);
 
         } else {
-            // ---- Zag: key == root->right->value (target is direct right child) ----
+
             root = rotateLeft(root);
 
             SplayStep step;
@@ -194,9 +194,9 @@ Node* SplayTree::splay(Node* root, int key) {
     return root;
 }
 
-// ---------------------------------------------------------------------------
-// Public interface
-// ---------------------------------------------------------------------------
+
+
+
 
 bool SplayTree::insert(int value) {
     clearLastSplaySteps();
@@ -215,25 +215,25 @@ bool SplayTree::insert(int value) {
         return true;
     }
 
-    // Splay the closest node to the insertion point to root
+
     root_ = splay(root_, value);
 
     if (root_->getValue() == value) {
-        // Duplicate: already in tree
+
         return false;
     }
 
-    // Create new node and split the tree at current root
+
     Node* newNode = new Node(value, nextNodeId_++);
 
     if (value < root_->getValue()) {
-        // new node gets root's left subtree; root_ keeps its right subtree
+
         newNode->setRight(root_);
         newNode->setLeft(root_->getLeft());
         root_->setLeft(nullptr);
         updateHeight(root_);
     } else {
-        // new node gets root's right subtree; root_ keeps its left subtree
+
         newNode->setLeft(root_);
         newNode->setRight(root_->getRight());
         root_->setRight(nullptr);
@@ -263,15 +263,15 @@ bool SplayTree::remove(int value) {
         return false;
     }
 
-    // Splay the target to root
+
     root_ = splay(root_, value);
 
     if (root_->getValue() != value) {
-        // Not found
+
         return false;
     }
 
-    // Target is at root
+
     lastDeletion_.occurred       = true;
     lastDeletion_.targetValue    = value;
     lastDeletion_.hasTwoChildren = (root_->getLeft() != nullptr &&
@@ -293,10 +293,10 @@ bool SplayTree::remove(int value) {
     } else if (rightSubtree == nullptr) {
         root_ = leftSubtree;
     } else {
-        // Splay maximum of left subtree (value-1 is always > everything in left,
-        // so splay(leftSubtree, value) will bring the max to the root of leftSubtree).
+
+
         leftSubtree = splay(leftSubtree, value);
-        // The new left-subtree root now has no right child (it was the max)
+
         leftSubtree->setRight(rightSubtree);
         updateHeight(leftSubtree);
         root_ = leftSubtree;
@@ -314,8 +314,8 @@ bool SplayTree::remove(int value) {
 }
 
 bool SplayTree::search(int value) const {
-    // Use const_cast to perform the splay (structural change that is logically
-    // const for a splay tree — it preserves the BST invariant and set of values).
+
+
     SplayTree* self = const_cast<SplayTree*>(this);
     self->clearLastSplaySteps();
 

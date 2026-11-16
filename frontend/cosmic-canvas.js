@@ -1,8 +1,8 @@
-/**
- * ==========================================================================
- * COSMIC CANVAS ENGINE // Interstellar Space Dust, Nebulae & Twinkling Stars
- * ==========================================================================
- */
+
+
+
+
+
 (function() {
     const canvas = document.getElementById('cosmic-canvas');
     if (!canvas) return;
@@ -25,7 +25,7 @@
     window.addEventListener('resize', resize);
     resize();
 
-    // Initialize Stars
+
     const starColors = ['#ffffff', '#00f2fe', '#4facfe', '#bd00ff', '#ffeaa7', '#ff7675'];
     for (let i = 0; i < STAR_COUNT; i++) {
         stars.push({
@@ -40,12 +40,12 @@
         });
     }
 
-    // Initialize Nebulae Cloud Centers
+
     const nebulaColors = [
-        { r: 0, g: 242, b: 254, a: 0.045 }, // Cyan
-        { r: 189, g: 0, b: 255, a: 0.04 },  // Violet
-        { r: 0, g: 80, b: 200, a: 0.06 },   // Deep Blue
-        { r: 255, g: 0, b: 128, a: 0.03 }   // Magenta
+        { r: 0, g: 242, b: 254, a: 0.045 },
+        { r: 189, g: 0, b: 255, a: 0.04 },
+        { r: 0, g: 80, b: 200, a: 0.06 },
+        { r: 255, g: 0, b: 128, a: 0.03 }
     ];
 
     for (let i = 0; i < NEBULA_COUNT; i++) {
@@ -59,7 +59,7 @@
         });
     }
 
-    // Spawn shooting stars periodically
+
     function maybeSpawnShootingStar() {
         if (Math.random() < 0.012 && shootingStars.length < 2) {
             shootingStars.push({
@@ -77,7 +77,7 @@
     function render() {
         ctx.clearRect(0, 0, width, height);
 
-        // 1. Render Nebular Clouds
+
         for (const neb of nebulae) {
             neb.angle += neb.speed;
             const curX = neb.x + Math.cos(neb.angle) * 40;
@@ -95,7 +95,7 @@
             ctx.fill();
         }
 
-        // 2. Render Twinkling Stars
+
         for (const star of stars) {
             star.alpha += star.twinkleSpeed;
             if (star.alpha > 1 || star.alpha < 0.15) {
@@ -116,7 +116,7 @@
             ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
             ctx.fill();
 
-            // Glow around brightest stars
+
             if (star.radius > 1.3) {
                 ctx.shadowColor = star.color;
                 ctx.shadowBlur = 8;
@@ -127,7 +127,7 @@
             ctx.restore();
         }
 
-        // 3. Render Shooting Stars
+
         maybeSpawnShootingStar();
         for (let i = shootingStars.length - 1; i >= 0; i--) {
             const ss = shootingStars[i];

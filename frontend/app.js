@@ -1,12 +1,12 @@
-/**
- * ==========================================================================
- * CHRONO-COSMOS // APPLICATION CONTROLLER & AUDIO SYNTHESIS
- * ==========================================================================
- */
 
-// ==========================================================================
-// 1. QUANTUM AUDIO SYNTHESIS ENGINE (Web Audio API)
-// ==========================================================================
+
+
+
+
+
+
+
+
 class QuantumAudio {
     constructor() {
         this.ctx = null;
@@ -30,7 +30,7 @@ class QuantumAudio {
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
 
-        // Frequency mapped harmonically from star key
+
         const freq = 260 + (val % 700) * 0.8;
         osc.type = 'sine';
         osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
@@ -50,7 +50,7 @@ class QuantumAudio {
         this.init();
         if (!this.ctx) return;
 
-        // Gravitational frequency sweep
+
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
 
@@ -73,7 +73,7 @@ class QuantumAudio {
         this.init();
         if (!this.ctx) return;
 
-        const notes = [523.25, 659.25, 783.99, 1046.50]; // C E G C chord
+        const notes = [523.25, 659.25, 783.99, 1046.50];
         notes.forEach((freq, i) => {
             const osc = this.ctx.createOscillator();
             const gain = this.ctx.createGain();
@@ -117,12 +117,12 @@ class QuantumAudio {
 
 window.AudioEngine = new QuantumAudio();
 
-// ==========================================================================
-// 2. MAIN APPLICATION CORE
-// ==========================================================================
+
+
+
 class CosmosApp {
     constructor() {
-        // API Base URL Detection
+
         this.apiBase = (window.location.protocol.startsWith('http')) 
             ? `${window.location.origin}/api` 
             : 'http://127.0.0.1:8080/api';
@@ -141,7 +141,7 @@ class CosmosApp {
     }
 
     initElements() {
-        // Inputs & buttons
+
         this.inputVal = document.getElementById('node-value-input');
         this.btnRandom = document.getElementById('btn-random-val');
         this.btnInsert = document.getElementById('btn-insert');
@@ -150,22 +150,22 @@ class CosmosApp {
         this.btnSample = document.getElementById('btn-sample');
         this.btnClear = document.getElementById('btn-clear');
 
-        // Mode switchers
+
         this.modeBst = document.getElementById('mode-bst');
         this.modeAvl = document.getElementById('mode-avl');
         this.modeSplay = document.getElementById('mode-splay');
 
-        // View controls
+
         this.btnZoomIn = document.getElementById('btn-zoom-in');
         this.btnZoomOut = document.getElementById('btn-zoom-out');
         this.btnZoomReset = document.getElementById('btn-zoom-reset');
 
-        // Telemetry stats
+
         this.statNodes = document.getElementById('stat-nodes');
         this.statHeight = document.getElementById('stat-height');
         this.statStatus = document.getElementById('stat-status');
 
-        // Panels
+
         this.nodeCard = document.getElementById('selected-node-card');
         this.missionLog = document.getElementById('mission-log');
         this.btnClearLog = document.getElementById('btn-clear-log');
@@ -173,23 +173,23 @@ class CosmosApp {
         this.warpTitle = document.getElementById('warp-title');
         this.warpDesc = document.getElementById('warp-desc');
 
-        // Traversal UI
+
         this.traversalDisplay = document.getElementById('traversal-display');
         this.traversalTitle = document.getElementById('traversal-title');
         this.traversalChips = document.getElementById('traversal-chips');
         this.btnCloseTraversal = document.getElementById('btn-close-traversal');
 
-        // Speed & Audio
+
         this.speedSlider = document.getElementById('speed-slider');
         this.speedDisplay = document.getElementById('speed-display');
         this.audioToggle = document.getElementById('audio-toggle');
     }
 
     bindEvents() {
-        // User gesture unlocks Web Audio
+
         window.addEventListener('click', () => window.AudioEngine.init(), { once: true });
 
-        // Action Buttons
+
         this.btnInsert.addEventListener('click', () => this.handleInsert());
         this.btnDelete.addEventListener('click', () => this.handleDelete());
         this.btnSearch.addEventListener('click', () => this.handleSearch());
@@ -197,24 +197,24 @@ class CosmosApp {
         this.btnClear.addEventListener('click', () => this.handleClear());
         this.btnRandom.addEventListener('click', () => this.handleRandomValue());
 
-        // Enter key in input triggers insert
+
         this.inputVal.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 this.handleInsert();
             }
         });
 
-        // Mode switch
+
         this.modeBst.addEventListener('click', () => this.setMode('BST'));
         this.modeAvl.addEventListener('click', () => this.setMode('AVL'));
         this.modeSplay.addEventListener('click', () => this.setMode('SPLAY'));
 
-        // Viewport controls
+
         this.btnZoomIn.addEventListener('click', () => this.visualizer.zoomIn());
         this.btnZoomOut.addEventListener('click', () => this.visualizer.zoomOut());
         this.btnZoomReset.addEventListener('click', () => this.visualizer.resetView());
 
-        // Traversal Buttons
+
         document.querySelectorAll('.traversal-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const type = btn.getAttribute('data-traversal');
@@ -226,18 +226,18 @@ class CosmosApp {
             this.traversalDisplay.classList.add('hidden');
         });
 
-        // Speed Slider
+
         this.speedSlider.addEventListener('input', (e) => {
             this.speedMultiplier = parseFloat(e.target.value);
             this.speedDisplay.textContent = `${this.speedMultiplier.toFixed(1)}x`;
         });
 
-        // Audio Toggle
+
         this.audioToggle.addEventListener('change', (e) => {
             window.AudioEngine.enabled = e.target.checked;
         });
 
-        // Clear Log
+
         this.btnClearLog.addEventListener('click', () => {
             this.missionLog.innerHTML = '';
         });
@@ -272,7 +272,7 @@ class CosmosApp {
 
         if (treeData.treeType) {
             this.currentMode = treeData.treeType;
-            // Clear all active states first
+
             [this.modeBst, this.modeAvl, this.modeSplay].forEach(btn => {
                 if (btn) btn.classList.remove('active');
             });
@@ -281,7 +281,7 @@ class CosmosApp {
             } else if (this.currentMode === 'SPLAY') {
                 if (this.modeSplay) this.modeSplay.classList.add('active');
             } else {
-                // AVL (or default)
+
                 if (this.modeAvl) this.modeAvl.classList.add('active');
             }
         }
@@ -290,11 +290,11 @@ class CosmosApp {
     showWarpBanner(rotations) {
         if (!rotations || rotations.length === 0) return;
 
-        const rot = rotations[rotations.length - 1]; // latest rotation
+        const rot = rotations[rotations.length - 1];
         this.warpTitle.textContent = `${rot.type} ROTATION`;
         this.warpDesc.textContent = rot.description;
 
-        // Reset badge to AVL style
+
         const badge = document.getElementById('warp-badge');
         if (badge) {
             badge.textContent = 'AVL REBALANCE';
@@ -367,9 +367,9 @@ class CosmosApp {
         });
     }
 
-    // ==========================================================================
-    // BACKEND API CALLS
-    // ==========================================================================
+
+
+
     async connectBackend() {
         this.log('info', `Connecting to C++ Quantum Core at ${this.apiBase}...`);
         try {
@@ -421,16 +421,16 @@ class CosmosApp {
 
             const data = await res.json();
             if (data.success) {
-                // Step 1: Trace insertion comparison sweep
+
                 if (data.searchPath && data.searchPath.length > 0) {
                     await this.visualizer.animateSearchPath(data.searchPath, true, this.speedMultiplier);
                 }
 
-                // Step 2: Render newly inserted star and updated layout
+
                 this.visualizer.renderTree(data.tree);
                 this.updateTelemetry(data.tree);
 
-                // Step 3: If AVL rebalancing occurred, animate each rotation with flux arcs
+
                 if (data.tree && data.tree.lastRotations && data.tree.lastRotations.length > 0) {
                     this.showWarpBanner(data.tree.lastRotations);
                     for (const rot of data.tree.lastRotations) {
@@ -438,7 +438,7 @@ class CosmosApp {
                     }
                 }
 
-                // Step 4: If Splay rebalancing occurred, animate splay steps
+
                 const splaySteps = data.splaySteps || (data.tree && data.tree.lastSplaySteps);
                 if (splaySteps && splaySteps.length > 0) {
                     this.showSplayBanner(splaySteps);
@@ -476,23 +476,23 @@ class CosmosApp {
 
             const data = await res.json();
             if (data.success) {
-                // Step 1: Animate search sweep to target node
+
                 if (data.searchPath && data.searchPath.length > 0) {
                     await this.visualizer.animateSearchPath(data.searchPath, true, this.speedMultiplier);
                 }
 
-                // Step 2: Check if two-children deletion swap occurred
+
                 const deletionInfo = data.lastDeletion || (data.tree && data.tree.lastDeletion);
                 if (deletionInfo && deletionInfo.hasTwoChildren && deletionInfo.successorValue) {
                     this.log('warn', `[STELLAR SWAP] Target Star ${deletionInfo.targetValue} has 2 children -> Swapping with Inorder Successor Star ${deletionInfo.successorValue}`);
                     await this.visualizer.animateSwap(deletionInfo.targetValue, deletionInfo.successorValue, this.speedMultiplier);
                 }
 
-                // Step 3: Render updated tree state
+
                 this.visualizer.renderTree(data.tree);
                 this.updateTelemetry(data.tree);
 
-                // Step 4: Animate any AVL rotations triggered by the deletion rebalancing
+
                 if (data.tree && data.tree.lastRotations && data.tree.lastRotations.length > 0) {
                     this.showWarpBanner(data.tree.lastRotations);
                     for (const rot of data.tree.lastRotations) {
@@ -500,7 +500,7 @@ class CosmosApp {
                     }
                 }
 
-                // Step 5: If Splay rebalancing occurred, animate splay steps
+
                 const splaySteps = data.splaySteps || (data.tree && data.tree.lastSplaySteps);
                 if (splaySteps && splaySteps.length > 0) {
                     this.showSplayBanner(splaySteps);
@@ -541,7 +541,7 @@ class CosmosApp {
                 await this.visualizer.animateSearchPath(data.path, data.found, this.speedMultiplier);
             }
 
-            // Splay Tree: search reorganizes the tree, moving the accessed node to root
+
             const splaySteps = data.splaySteps || (data.tree && data.tree.lastSplaySteps);
             if (splaySteps && splaySteps.length > 0) {
                 this.showSplayBanner(splaySteps);
@@ -649,7 +649,7 @@ class CosmosApp {
                 this.traversalChips.innerHTML = '';
                 this.traversalDisplay.classList.remove('hidden');
 
-                // Render chips
+
                 const chipEls = [];
                 data.sequence.forEach((val, i) => {
                     const chip = document.createElement('span');
@@ -659,7 +659,7 @@ class CosmosApp {
                     chipEls.push(chip);
                 });
 
-                // Animate traversal with step highlight
+
                 await this.visualizer.animateTraversal(data.sequence, this.speedMultiplier, (val, index) => {
                     chipEls.forEach((c, idx) => {
                         if (idx === index) {
@@ -687,7 +687,7 @@ class CosmosApp {
     }
 }
 
-// Instantiate on DOM load
+
 window.addEventListener('DOMContentLoaded', () => {
     window.app = new CosmosApp();
 });

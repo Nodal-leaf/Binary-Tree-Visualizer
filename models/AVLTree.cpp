@@ -25,11 +25,11 @@ Node* AVLTree::rotateRight(Node* y) {
     Node* x = y->getLeft();
     Node* T2 = x->getRight();
 
-    // Perform rotation
+
     x->setRight(y);
     y->setLeft(T2);
 
-    // Update heights
+
     updateHeight(y);
     updateHeight(x);
 
@@ -40,11 +40,11 @@ Node* AVLTree::rotateLeft(Node* x) {
     Node* y = x->getRight();
     Node* T2 = y->getLeft();
 
-    // Perform rotation
+
     y->setLeft(x);
     x->setRight(T2);
 
-    // Update heights
+
     updateHeight(x);
     updateHeight(y);
 
@@ -69,10 +69,10 @@ Node* AVLTree::balance(Node* node) {
     updateHeight(node);
     int bf = node->getBalanceFactor();
 
-    // Case 1: Left heavy (bf > 1)
+
     if (bf > 1) {
         if (node->getLeft() != nullptr && node->getLeft()->getBalanceFactor() >= 0) {
-            // LL Rotation
+
             RotationStep step;
             step.type = "LL";
             step.direction = "clockwise";
@@ -86,7 +86,7 @@ Node* AVLTree::balance(Node* node) {
             lastRotations_.push_back(step);
             return res;
         } else if (node->getLeft() != nullptr) {
-            // LR Rotation
+
             RotationStep step;
             step.type = "LR";
             step.direction = "double-LR";
@@ -104,10 +104,10 @@ Node* AVLTree::balance(Node* node) {
         }
     }
 
-    // Case 2: Right heavy (bf < -1)
+
     if (bf < -1) {
         if (node->getRight() != nullptr && node->getRight()->getBalanceFactor() <= 0) {
-            // RR Rotation
+
             RotationStep step;
             step.type = "RR";
             step.direction = "counter-clockwise";
@@ -121,7 +121,7 @@ Node* AVLTree::balance(Node* node) {
             lastRotations_.push_back(step);
             return res;
         } else if (node->getRight() != nullptr) {
-            // RL Rotation
+
             RotationStep step;
             step.type = "RL";
             step.direction = "double-RL";
@@ -157,7 +157,7 @@ Node* AVLTree::insertHelper(Node* current, int value, bool& inserted) {
         return current;
     }
 
-    // Rebalance node on recursion backtrack
+
     return balance(current);
 }
 
@@ -182,7 +182,7 @@ Node* AVLTree::removeHelper(Node* current, int value, bool& removed) {
     } else if (value > current->getValue()) {
         current->setRight(removeHelper(current->getRight(), value, removed));
     } else {
-        // Node found
+
         removed = true;
 
         if (current->getLeft() == nullptr || current->getRight() == nullptr) {
@@ -194,16 +194,16 @@ Node* AVLTree::removeHelper(Node* current, int value, bool& removed) {
 
             Node* temp = (current->getLeft() != nullptr) ? current->getLeft() : current->getRight();
             if (temp == nullptr) {
-                // No child (leaf node)
+
                 delete current;
                 return nullptr;
             } else {
-                // Exactly one child: return child and delete current
+
                 delete current;
                 return balance(temp);
             }
         } else {
-            // Two children
+
             Node* successor = findMin(current->getRight());
             lastDeletion_.occurred = true;
             lastDeletion_.targetValue = value;
@@ -222,7 +222,7 @@ Node* AVLTree::removeHelper(Node* current, int value, bool& removed) {
         return nullptr;
     }
 
-    // Rebalance node on recursion backtrack
+
     return balance(current);
 }
 

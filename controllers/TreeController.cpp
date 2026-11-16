@@ -26,20 +26,20 @@ int TreeController::parseValueFromJson(const std::string& body, bool& ok) {
 }
 
 void TreeController::registerRoutes(httplib::Server& svr) {
-    // Global CORS preflight handler
+
     svr.Options(".*", [this](const httplib::Request&, httplib::Response& res) {
         setupCors(res);
         res.status = 204;
     });
 
-    // GET /api/tree - Get full tree state
+
     svr.Get("/api/tree", [this](const httplib::Request&, httplib::Response& res) {
         setupCors(res);
         nlohmann::json state = treeService_->getTreeState();
         res.set_content(state.dump(2), "application/json");
     });
 
-    // POST /api/tree/type - Switch between BST and AVL
+
     svr.Post("/api/tree/type", [this](const httplib::Request& req, httplib::Response& res) {
         setupCors(res);
         std::string type = "AVL";
@@ -58,7 +58,7 @@ void TreeController::registerRoutes(httplib::Server& svr) {
         res.set_content(result.dump(2), "application/json");
     });
 
-    // POST /api/insert - Insert a value
+
     svr.Post("/api/insert", [this](const httplib::Request& req, httplib::Response& res) {
         setupCors(res);
         bool ok = false;
@@ -77,7 +77,7 @@ void TreeController::registerRoutes(httplib::Server& svr) {
         res.set_content(result.dump(2), "application/json");
     });
 
-    // POST /api/delete - Delete a value
+
     svr.Post("/api/delete", [this](const httplib::Request& req, httplib::Response& res) {
         setupCors(res);
         bool ok = false;
@@ -96,7 +96,7 @@ void TreeController::registerRoutes(httplib::Server& svr) {
         res.set_content(result.dump(2), "application/json");
     });
 
-    // POST /api/search - Search for a value and return animated search path
+
     svr.Post("/api/search", [this](const httplib::Request& req, httplib::Response& res) {
         setupCors(res);
         bool ok = false;
@@ -115,14 +115,14 @@ void TreeController::registerRoutes(httplib::Server& svr) {
         res.set_content(result.dump(2), "application/json");
     });
 
-    // POST /api/clear - Clear the tree
+
     svr.Post("/api/clear", [this](const httplib::Request&, httplib::Response& res) {
         setupCors(res);
         nlohmann::json result = treeService_->clearTree();
         res.set_content(result.dump(2), "application/json");
     });
 
-    // POST /api/batch - Insert multiple numbers at once
+
     svr.Post("/api/batch", [this](const httplib::Request& req, httplib::Response& res) {
         setupCors(res);
         std::vector<int> values;
@@ -149,14 +149,14 @@ void TreeController::registerRoutes(httplib::Server& svr) {
         res.set_content(result.dump(2), "application/json");
     });
 
-    // POST /api/sample - Load standard demo tree
+
     svr.Post("/api/sample", [this](const httplib::Request&, httplib::Response& res) {
         setupCors(res);
         nlohmann::json result = treeService_->loadSample();
         res.set_content(result.dump(2), "application/json");
     });
 
-    // GET /api/traversal/:type - Get traversal order (inorder, preorder, postorder)
+
     svr.Get(R"(/api/traversal/(\w+))", [this](const httplib::Request& req, httplib::Response& res) {
         setupCors(res);
         std::string type = req.matches[1];
@@ -167,7 +167,7 @@ void TreeController::registerRoutes(httplib::Server& svr) {
         res.set_content(result.dump(2), "application/json");
     });
 
-    // Serve static files from the frontend directory
+
     svr.set_mount_point("/", "./frontend");
     svr.set_file_extension_and_mimetype_mapping("svg", "image/svg+xml");
     svr.set_file_extension_and_mimetype_mapping("js", "application/javascript");

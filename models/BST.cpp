@@ -31,7 +31,7 @@ Node* BST::insertHelper(Node* current, int value, bool& inserted) {
     } else if (value > current->getValue()) {
         current->setRight(insertHelper(current->getRight(), value, inserted));
     } else {
-        // Duplicate key, cannot insert in strict BST
+
         inserted = false;
         return current;
     }
@@ -60,10 +60,10 @@ Node* BST::removeHelper(Node* current, int value, bool& removed) {
     } else if (value > current->getValue()) {
         current->setRight(removeHelper(current->getRight(), value, removed));
     } else {
-        // Node found
+
         removed = true;
 
-        // Case 1 & 2: 0 or 1 child
+
         if (current->getLeft() == nullptr) {
             lastDeletion_.occurred = true;
             lastDeletion_.targetValue = value;
@@ -84,8 +84,8 @@ Node* BST::removeHelper(Node* current, int value, bool& removed) {
             return temp;
         }
 
-        // Case 3: 2 children
-        // Find inorder successor (minimum node in right subtree)
+
+
         Node* successor = findMin(current->getRight());
         lastDeletion_.occurred = true;
         lastDeletion_.targetValue = value;
@@ -95,7 +95,7 @@ Node* BST::removeHelper(Node* current, int value, bool& removed) {
                                     std::to_string(successor->getValue()) + " (minimum of right subtree).";
 
         current->setValue(successor->getValue());
-        // Recursively remove the successor from the right subtree
+
         bool dummyRemoved = false;
         current->setRight(removeHelper(current->getRight(), successor->getValue(), dummyRemoved));
     }

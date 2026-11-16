@@ -13,7 +13,7 @@ void signalHandler(int signum) {
 }
 
 int main(int argc, char* argv[]) {
-    // Register signal handlers for clean exit
+
     std::signal(SIGINT, signalHandler);
     std::signal(SIGTERM, signalHandler);
 
@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
 
     std::cout << "Initializing Tree Backend Services..." << std::endl;
     auto service = std::make_shared<TreeService>("AVL");
-    // Pre-populate with a balanced sample tree for immediate demonstration
+
     service->loadSample();
 
     TreeController controller(service);

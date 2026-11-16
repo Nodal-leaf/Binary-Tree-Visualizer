@@ -9,7 +9,7 @@
 #include "../models/AVLTree.h"
 #include "../models/SplayTree.h"
 
-// ANSI colors for clean test reporting
+
 #define GREEN "\033[32m"
 #define RED "\033[31m"
 #define CYAN "\033[36m"
@@ -38,7 +38,7 @@ void testNodeEncapsulation() {
     assert(node.hasBothChildren() == true);
     assert(node.isLeaf() == false);
 
-    // Serialization
+
     nlohmann::json j = node.toJson();
     assert(j["value"] == 100);
     assert(j["left"]["value"] == 50);
@@ -56,16 +56,16 @@ void testBSTOperations() {
     assert(bst.getNodeCount() == 0);
     assert(bst.getHeight() == 0);
 
-    // Insert elements
+
     std::vector<int> values = {50, 30, 70, 20, 40, 60, 80};
     for (int v : values) {
         bool inserted = bst.insert(v);
         assert(inserted);
     }
     assert(bst.getNodeCount() == 7);
-    assert(!bst.insert(50)); // Duplicate rejected
+    assert(!bst.insert(50));
 
-    // Traversals
+
     std::vector<int> expectedInorder = {20, 30, 40, 50, 60, 70, 80};
     assert(bst.inorder() == expectedInorder);
 
@@ -75,7 +75,7 @@ void testBSTOperations() {
     std::vector<int> expectedPostorder = {20, 40, 30, 60, 80, 70, 50};
     assert(bst.postorder() == expectedPostorder);
 
-    // Search & Search Path
+
     assert(bst.search(40) == true);
     assert(bst.search(999) == false);
 
@@ -83,20 +83,20 @@ void testBSTOperations() {
     std::vector<int> expectedPath40 = {50, 30, 40};
     assert(searchPath40 == expectedPath40);
 
-    // Deletion: Case 1 - Leaf Node (20)
+
     assert(bst.remove(20) == true);
     assert(bst.getNodeCount() == 6);
     assert(bst.search(20) == false);
     assert(bst.inorder() == (std::vector<int>{30, 40, 50, 60, 70, 80}));
 
-    // Deletion: Case 2 - Node with 1 Child
-    // Let's remove 30 (now only has right child 40)
+
+
     assert(bst.remove(30) == true);
     assert(bst.getNodeCount() == 5);
     assert(bst.search(30) == false);
     assert(bst.inorder() == (std::vector<int>{40, 50, 60, 70, 80}));
 
-    // Deletion: Case 3 - Node with 2 Children (50 root)
+
     assert(bst.remove(50) == true);
     assert(bst.getNodeCount() == 4);
     assert(bst.search(50) == false);
@@ -110,7 +110,7 @@ void testAVLLRotations() {
     AVLTree avl;
     avl.insert(30);
     avl.insert(20);
-    avl.insert(10); // LL imbalance at 30
+    avl.insert(10);
 
     assert(avl.getRoot()->getValue() == 20);
     assert(avl.getRoot()->getLeft()->getValue() == 10);
@@ -126,7 +126,7 @@ void testAVLRRRotations() {
     AVLTree avl;
     avl.insert(10);
     avl.insert(20);
-    avl.insert(30); // RR imbalance at 10
+    avl.insert(30);
 
     assert(avl.getRoot()->getValue() == 20);
     assert(avl.getRoot()->getLeft()->getValue() == 10);
@@ -142,7 +142,7 @@ void testAVLLRRotations() {
     AVLTree avl;
     avl.insert(30);
     avl.insert(10);
-    avl.insert(20); // LR imbalance at 30
+    avl.insert(20);
 
     assert(avl.getRoot()->getValue() == 20);
     assert(avl.getRoot()->getLeft()->getValue() == 10);
@@ -158,7 +158,7 @@ void testAVLRLRotations() {
     AVLTree avl;
     avl.insert(10);
     avl.insert(30);
-    avl.insert(20); // RL imbalance at 10
+    avl.insert(20);
 
     assert(avl.getRoot()->getValue() == 20);
     assert(avl.getRoot()->getLeft()->getValue() == 10);
@@ -169,7 +169,7 @@ void testAVLRLRotations() {
     std::cout << GREEN << "✓ AVL RL Rotation verified: " << avl.getLastRotations()[0].description << RESET << std::endl;
 }
 
-// Helper to check AVL balance invariant across all nodes
+
 bool verifyAVLBalanceInvariant(const Node* node) {
     if (node == nullptr) return true;
     int bf = node->getBalanceFactor();
@@ -188,7 +188,7 @@ void testAVLComplexSequenceAndDeletion() {
     assert(avl.getNodeCount() == 11);
     assert(verifyAVLBalanceInvariant(avl.getRoot()));
 
-    // Delete nodes causing rebalancing
+
     avl.remove(5);
     assert(verifyAVLBalanceInvariant(avl.getRoot()));
     avl.remove(10);
@@ -198,7 +198,7 @@ void testAVLComplexSequenceAndDeletion() {
     assert(!avl.search(50));
     assert(avl.getNodeCount() == 8);
 
-    // JSON export test
+
     nlohmann::json treeJson = avl.toJson();
     assert(treeJson["treeType"] == "AVL");
     assert(treeJson["nodeCount"] == 8);
@@ -210,7 +210,7 @@ void testAVLComplexSequenceAndDeletion() {
 
 void testPolymorphismAndAbstraction() {
     std::cout << CYAN << "Running Test: Polymorphism & Abstraction via Base Pointer..." << RESET << std::endl;
-    // Polymorphic array of base class pointers
+
     std::vector<std::unique_ptr<BinarySearchTree>> trees;
     trees.push_back(std::make_unique<BST>());
     trees.push_back(std::make_unique<AVLTree>());
@@ -222,15 +222,15 @@ void testPolymorphismAndAbstraction() {
         }
     }
 
-    // BST will have degraded into a linear chain (height = 5)
+
     assert(trees[0]->getTreeType() == "BST");
     assert(trees[0]->getHeight() == 5);
 
-    // AVL will have self-balanced (height = 3)
+
     assert(trees[1]->getTreeType() == "AVL");
     assert(trees[1]->getHeight() == 3);
 
-    // Inorder must be identical for both (sorted)
+
     assert(trees[0]->inorder() == trees[1]->inorder());
 
     std::cout << GREEN << "✓ Polymorphism verified: BST height = " << trees[0]->getHeight() 
@@ -243,7 +243,7 @@ void testSplayTree() {
     assert(splay.getTreeType() == "SPLAY");
     assert(splay.isEmpty());
 
-    // Insert elements
+
     splay.insert(10);
     assert(splay.getRoot()->getValue() == 10);
 
@@ -260,26 +260,26 @@ void testSplayTree() {
     assert(splay.getRoot()->getValue() == 25);
     assert(splay.getNodeCount() == 5);
 
-    // Search brings accessed element to root
+
     bool found = splay.search(5);
     assert(found);
     assert(splay.getRoot()->getValue() == 5);
 
-    // Search missing element splays closest visited node
+
     bool foundMissing = splay.search(12);
     assert(!foundMissing);
     assert(splay.getRoot() != nullptr);
 
-    // Delete
+
     bool removed = splay.remove(15);
     assert(removed);
     assert(splay.getNodeCount() == 4);
     assert(!splay.search(15));
 
-    // Splay steps telemetry
+
     assert(!splay.getLastSplaySteps().empty());
 
-    // Serialization
+
     nlohmann::json j = splay.toJson();
     assert(j["treeType"] == "SPLAY");
     assert(j.contains("lastSplaySteps"));

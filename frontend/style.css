@@ -1,6 +1,6 @@
-/* ==========================================================================
-   MINIMALIST NEON GREEN BINARY TREE VISUALIZER
-   ========================================================================== */
+
+
+
 
 :root {
     --bg-black: #000000;
@@ -41,9 +41,9 @@ body {
     user-select: none;
 }
 
-/* ==========================================================================
-   MINIMAL FLOATING TOP CONTROL BAR
-   ========================================================================== */
+
+
+
 .control-bar {
     position: fixed;
     top: 16px;
@@ -63,7 +63,7 @@ body {
     overflow-x: auto;
 }
 
-/* Scrollbar for narrow screens */
+
 .control-bar::-webkit-scrollbar {
     height: 3px;
 }
@@ -80,7 +80,7 @@ body {
     flex-shrink: 0;
 }
 
-/* Buttons */
+
 .btn {
     background: #000000;
     color: var(--neon-green);
@@ -117,7 +117,7 @@ body {
     color: #666666;
 }
 
-/* Button Variants */
+
 .btn-primary {
     border-color: rgba(0, 255, 102, 0.5);
 }
@@ -143,7 +143,7 @@ body {
     font-size: 11px;
 }
 
-/* Button Groups (Mode / Traversals) */
+
 .btn-group {
     display: flex;
     gap: 4px;
@@ -158,7 +158,7 @@ body {
     font-weight: 700;
 }
 
-/* Input Group */
+
 .action-group {
     display: flex;
     align-items: center;
@@ -188,7 +188,7 @@ body {
     color: rgba(0, 255, 102, 0.4);
 }
 
-/* Stats Pill */
+
 .stats-group {
     display: flex;
     align-items: center;
@@ -218,9 +218,9 @@ body {
     box-shadow: 0 0 8px var(--neon-red);
 }
 
-/* ==========================================================================
-   FULLSCREEN SVG CANVAS STAGE
-   ========================================================================== */
+
+
+
 #svg-container {
     position: fixed;
     top: 0;
@@ -242,9 +242,9 @@ body {
     display: block;
 }
 
-/* ==========================================================================
-   SVG NODES & EDGES (GLOWING NEON GREEN)
-   ========================================================================== */
+
+
+
 .constellation-edge {
     stroke: var(--neon-green);
     stroke-width: 2.2px;
@@ -260,13 +260,13 @@ body {
     filter: drop-shadow(0 0 12px var(--neon-green));
 }
 
-/* Node Group */
+
 .star-group {
     cursor: pointer;
     transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-/* Outer Orbital Ring */
+
 .outer-orbital-ring {
     fill: none;
     stroke: rgba(0, 255, 102, 0.35);
@@ -281,7 +281,7 @@ body {
     100% { transform: rotate(360deg); }
 }
 
-/* Node Corona Body */
+
 .star-corona {
     fill: #000e04;
     stroke: var(--neon-green);
@@ -290,7 +290,7 @@ body {
     transition: all 0.25s ease;
 }
 
-/* Node Label */
+
 .star-key-text {
     fill: var(--neon-green);
     font-family: var(--font-mono);
@@ -303,7 +303,7 @@ body {
     transition: fill 0.2s ease;
 }
 
-/* Satellite Pill Badge (BF / Height) */
+
 .satellite-rect {
     fill: #000000;
     stroke-width: 1px;
@@ -319,13 +319,13 @@ body {
     text-anchor: middle;
 }
 
-/* Node Hover */
+
 .star-group:hover .star-corona {
     stroke: #ffffff;
     filter: drop-shadow(0 0 14px var(--neon-green));
 }
 
-/* Active Search/Sweep Node */
+
 .star-group.active-sweep .star-corona {
     fill: var(--neon-green) !important;
     stroke: #ffffff;
@@ -335,7 +335,7 @@ body {
     fill: #000000;
 }
 
-/* Active Selected / Target Node */
+
 .star-group.active-target .star-corona {
     stroke: #ffffff;
     stroke-width: 3.2px;
@@ -347,7 +347,7 @@ body {
     stroke-dasharray: none;
 }
 
-/* Rotation Pivot Node */
+
 .star-group.rotation-pivot .star-corona {
     stroke: var(--neon-yellow);
     filter: drop-shadow(0 0 16px var(--neon-yellow));
@@ -356,19 +356,19 @@ body {
     fill: var(--neon-yellow);
 }
 
-/* Deletion Collapsing Node */
+
 .star-group.collapsing-target .star-corona {
     stroke: var(--neon-red);
     filter: drop-shadow(0 0 16px var(--neon-red));
 }
 
-/* Inorder Successor Node */
+
 .star-group.inorder-successor .star-corona {
     stroke: var(--neon-yellow);
     filter: drop-shadow(0 0 16px var(--neon-yellow));
 }
 
-/* Swap Energy Beam */
+
 .swap-energy-beam {
     fill: none;
     stroke: var(--neon-green);
@@ -397,11 +397,11 @@ body {
     filter: drop-shadow(0 0 10px var(--neon-yellow));
 }
 
-/* ==========================================================================
-   SPLAY TREE STYLES
-   ========================================================================== */
 
-/* Splay mode active button — neon purple */
+
+
+
+
 .mode-btn[data-mode="SPLAY"].active {
     background: #bd00ff;
     color: #000;
@@ -410,7 +410,7 @@ body {
     font-weight: 700;
 }
 
-/* Splay step accessed node highlight */
+
 .star-group.splay-step .star-corona {
     stroke: #bd00ff;
     filter: drop-shadow(0 0 16px #bd00ff);
@@ -420,7 +420,7 @@ body {
     fill: #bd00ff;
 }
 
-/* Splay new-root node green pulse */
+
 .star-group.splay-new-root .star-corona {
     stroke: #39ff14;
     animation: newRootPulse 0.5s ease;
@@ -431,15 +431,15 @@ body {
     50%       { r: 24px; }
 }
 
-/* Splay toast badge — purple */
+
 .toast-badge.splay-badge {
     background: #bd00ff;
     color: #000000;
 }
 
-/* ==========================================================================
-   MINIMAL VIEWPORT CONTROLS (BOTTOM-RIGHT)
-   ========================================================================== */
+
+
+
 .viewport-controls {
     position: fixed;
     bottom: 20px;
@@ -476,9 +476,9 @@ body {
     box-shadow: 0 0 12px rgba(0, 255, 102, 0.8);
 }
 
-/* ==========================================================================
-   MINIMAL TOAST NOTIFICATION (ROTATION ALERT)
-   ========================================================================== */
+
+
+
 .minimal-toast {
     position: fixed;
     bottom: 24px;
@@ -529,9 +529,9 @@ body {
     font-size: 11px;
 }
 
-/* ==========================================================================
-   MINIMAL TRAVERSAL SEQUENCE BAR
-   ========================================================================== */
+
+
+
 .minimal-traversal-bar {
     position: fixed;
     bottom: 24px;
@@ -601,9 +601,9 @@ body {
     color: var(--text-white);
 }
 
-/* ==========================================================================
-   MINIMAL NODE POPUP CARD (BOTTOM-LEFT)
-   ========================================================================== */
+
+
+
 .minimal-node-card {
     position: fixed;
     bottom: 20px;
@@ -640,9 +640,9 @@ body {
     color: var(--neon-green);
 }
 
-/* ==========================================================================
-   EMPTY STATE PROMPT
-   ========================================================================== */
+
+
+
 .empty-state {
     position: absolute;
     top: 50%;
