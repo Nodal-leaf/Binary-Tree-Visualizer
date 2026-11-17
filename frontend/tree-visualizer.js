@@ -98,7 +98,7 @@ class TreeVisualizer {
         if (minX !== Infinity) {
             const treeWidth = maxX - minX;
             const treeCenterX = (minX + maxX) / 2;
-            this.panX = (rect.width / 2) - treeCenterX;
+            this.panX = (rect.width / 2) - (treeCenterX * this.scale);
             this.panY = 60;
         }
         this.updateTransform();
@@ -109,7 +109,7 @@ class TreeVisualizer {
 
 
     /**
-     * Reingold-Tilford / Buchheim aesthetic binary tree layout.
+     * Non-mutating Reingold-Tilford aesthetic binary tree layout.
      * Guarantees:
      * 1. Left child is strictly to the left: x(left) < x(parent)
      * 2. Right child is strictly to the right: x(right) > x(parent)
@@ -123,22 +123,23 @@ class TreeVisualizer {
         if (!root) return;
 
         const levelGap = 85;       // vertical distance between levels
-        const minDistance = 72;    // minimum horizontal distance between node centers
+        const minDistance = 74;    // minimum horizontal distance between node centers
 
-        // Step 1: Bottom-up layout of subtrees relative to each subtree's root (relX = 0)
+        // Step 1: Bottom-up layout determining relative offsets without modifying subtrees
         function buildLayout(node) {
             if (!node) return null;
 
             const left = buildLayout(node.left);
             const right = buildLayout(node.right);
 
-            // Leaf node: placed at relX = 0
+            // Leaf node
             if (!left && !right) {
                 return {
                     node: node,
-                    relX: 0,
-                    leftContour: [0],
-                    rightContour: [0],
+                    leftOffset: 0,
+                    rightOffset: 0,
+                    contourL: [0],
+                    contourR: [0],
                     left: null,
                     right: null
                 };
@@ -146,13 +147,19 @@ class TreeVisualizer {
 
             // Only left child
             if (left && !right) {
-                const offset = -minDistance * 0.75;
-                shiftTree(left, offset);
+                const leftOffset = -minDistance * 0.55;
+                const contourL = [0];
+                const contourR = [0];
+                for (let d = 0; d < left.contourL.length; d++) {
+                    contourL.push(leftOffset + left.contourL[d]);
+                    contourR.push(leftOffset + left.contourR[d]);
+                }
                 return {
                     node: node,
-                    relX: 0,
-                    leftContour: [0, ...left.leftContour],
-                    rightContour: [0, ...left.rightContour],
+                    leftOffset: leftOffset,
+                    rightOffset: 0,
+                    contourL: contourL,
+                    contourR: contourR,
                     left: left,
                     right: null
                 };
@@ -160,13 +167,19 @@ class TreeVisualizer {
 
             // Only right child
             if (!left && right) {
-                const offset = minDistance * 0.75;
-                shiftTree(right, offset);
+                const rightOffset = minDistance * 0.55;
+                const contourL = [0];
+                const contourR = [0];
+                for (let d = 0; d < right.contourL.length; d++) {
+                    contourL.push(rightOffset + right.contourL[d]);
+                    contourR.push(rightOffset + right.contourR[d]);
+                }
                 return {
                     node: node,
-                    relX: 0,
-                    leftContour: [0, ...right.leftContour],
-                    rightContour: [0, ...right.rightContour],
+                    leftOffset: 0,
+                    rightOffset: rightOffset,
+                    contourL: contourL,
+                    contourR: contourR,
                     left: null,
                     right: right
                 };
@@ -174,88 +187,74 @@ class TreeVisualizer {
 
             // Both children exist:
             // Calculate minimum distance needed so left and right subtrees do not collide at any depth
-            let maxOverlap = 0;
-            const checkDepth = Math.min(left.rightContour.length, right.leftContour.length);
+            let sep = minDistance;
+            const checkDepth = Math.min(left.contourR.length, right.contourL.length);
             for (let d = 0; d < checkDepth; d++) {
-                const diff = left.rightContour[d] - right.leftContour[d];
-                if (diff + minDistance > maxOverlap) {
-                    maxOverlap = diff + minDistance;
+                const requiredSep = minDistance + left.contourR[d] - right.contourL[d];
+                if (requiredSep > sep) {
+                    sep = requiredSep;
                 }
             }
 
-            const separation = Math.max(minDistance, maxOverlap);
+            const leftOffset = -sep / 2;
+            const rightOffset = sep / 2;
 
-            // Center parent between left and right subtrees
-            shiftTree(left, -separation / 2);
-            shiftTree(right, separation / 2);
-
-            // Merge contours
-            const leftContour = [0];
-            const rightContour = [0];
-            const maxD = Math.max(left.leftContour.length, right.leftContour.length);
+            const contourL = [0];
+            const contourR = [0];
+            const maxD = Math.max(left.contourL.length, right.contourL.length);
             for (let d = 0; d < maxD; d++) {
-                const lc = (d < left.leftContour.length)
-                    ? left.leftContour[d]
-                    : right.leftContour[d];
-                const rc = (d < right.rightContour.length)
-                    ? right.rightContour[d]
-                    : left.rightContour[d];
-                leftContour.push(lc);
-                rightContour.push(rc);
+                const lBound = (d < left.contourL.length)
+                    ? (leftOffset + left.contourL[d])
+                    : (rightOffset + right.contourL[d]);
+                const rBound = (d < right.contourR.length)
+                    ? (rightOffset + right.contourR[d])
+                    : (leftOffset + left.contourR[d]);
+                contourL.push(lBound);
+                contourR.push(rBound);
             }
 
             return {
                 node: node,
-                relX: 0,
-                leftContour: leftContour,
-                rightContour: rightContour,
+                leftOffset: leftOffset,
+                rightOffset: rightOffset,
+                contourL: contourL,
+                contourR: contourR,
                 left: left,
                 right: right
             };
         }
 
-        function shiftTree(item, dx) {
-            if (!item) return;
-            item.relX += dx;
-            for (let i = 0; i < item.leftContour.length; i++) item.leftContour[i] += dx;
-            for (let i = 0; i < item.rightContour.length; i++) item.rightContour[i] += dx;
-            shiftTree(item.left, dx);
-            shiftTree(item.right, dx);
-        }
-
         const layoutRoot = buildLayout(root);
         if (!layoutRoot) return;
 
-        // Step 2: Find minimum X to shift everything positive
-        let minX = Infinity;
-        function findMinX(item, currentX) {
-            if (!item) return;
-            const x = currentX + item.relX;
-            if (x < minX) minX = x;
-            findMinX(item.left, x);
-            findMinX(item.right, x);
-        }
-        findMinX(layoutRoot, 0);
-
-        const xShift = (minX < 80) ? (80 - minX) : 80;
-
+        // Step 2: Assign coordinates top-down using relative offsets
         const coords = this.nodeCoordinates;
-        function assignCoords(item, parentX, depth) {
+        function assignCoords(item, x, depth) {
             if (!item) return;
-            const x = parentX + item.relX;
-            const y = depth * levelGap + 60;
             coords.set(item.node.value, {
                 x: x,
-                y: y,
+                y: depth * levelGap + 60,
                 depth: depth,
                 data: item.node,
                 id: item.node.id
             });
-            assignCoords(item.left, x, depth + 1);
-            assignCoords(item.right, x, depth + 1);
+            if (item.left) assignCoords(item.left, x + item.leftOffset, depth + 1);
+            if (item.right) assignCoords(item.right, x + item.rightOffset, depth + 1);
         }
 
-        assignCoords(layoutRoot, xShift, 0);
+        assignCoords(layoutRoot, 0, 0);
+
+        // Step 3: Shift so all X positions are positive with minX at 80
+        let minX = Infinity;
+        coords.forEach(pos => {
+            if (pos.x < minX) minX = pos.x;
+        });
+        if (minX !== Infinity) {
+            const xShift = 80 - minX;
+            coords.forEach(pos => {
+                pos.x += xShift;
+            });
+        }
     }
 
     renderTree(treeData) {
