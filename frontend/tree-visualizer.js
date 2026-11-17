@@ -108,129 +108,249 @@ class TreeVisualizer {
 
 
 
+    /**
+     * Reingold-Tilford / Buchheim aesthetic binary tree layout.
+     * Guarantees:
+     * 1. Left child is strictly to the left: x(left) < x(parent)
+     * 2. Right child is strictly to the right: x(right) > x(parent)
+     * 3. Parent with two children is centered EXACTLY between them:
+     *    x(parent) = (x(left) + x(right)) / 2
+     * 4. Subtrees at any depth maintain minimum horizontal separation (no overlapping).
+     * 5. Clean, symmetric, classic binary tree shape.
+     */
     computeLayout(root) {
         this.nodeCoordinates.clear();
         if (!root) return;
-        let index = 0;
-        const levelGap = 85;
-        const nodeSpacing = 68;
-        function traverseInorder(node, depth, coords) {
-            if (!node) return;
-            traverseInorder(node.left, depth + 1, coords);
-            const x = index * nodeSpacing + 60;
-            const y = depth * levelGap + 50;
-            index++;
-            coords.set(node.value, {
+
+        const levelGap = 85;       // vertical distance between levels
+        const minDistance = 72;    // minimum horizontal distance between node centers
+
+        // Step 1: Bottom-up layout of subtrees relative to each subtree's root (relX = 0)
+        function buildLayout(node) {
+            if (!node) return null;
+
+            const left = buildLayout(node.left);
+            const right = buildLayout(node.right);
+
+            // Leaf node: placed at relX = 0
+            if (!left && !right) {
+                return {
+                    node: node,
+                    relX: 0,
+                    leftContour: [0],
+                    rightContour: [0],
+                    left: null,
+                    right: null
+                };
+            }
+
+            // Only left child
+            if (left && !right) {
+                const offset = -minDistance * 0.75;
+                shiftTree(left, offset);
+                return {
+                    node: node,
+                    relX: 0,
+                    leftContour: [0, ...left.leftContour],
+                    rightContour: [0, ...left.rightContour],
+                    left: left,
+                    right: null
+                };
+            }
+
+            // Only right child
+            if (!left && right) {
+                const offset = minDistance * 0.75;
+                shiftTree(right, offset);
+                return {
+                    node: node,
+                    relX: 0,
+                    leftContour: [0, ...right.leftContour],
+                    rightContour: [0, ...right.rightContour],
+                    left: null,
+                    right: right
+                };
+            }
+
+            // Both children exist:
+            // Calculate minimum distance needed so left and right subtrees do not collide at any depth
+            let maxOverlap = 0;
+            const checkDepth = Math.min(left.rightContour.length, right.leftContour.length);
+            for (let d = 0; d < checkDepth; d++) {
+                const diff = left.rightContour[d] - right.leftContour[d];
+                if (diff + minDistance > maxOverlap) {
+                    maxOverlap = diff + minDistance;
+                }
+            }
+
+            const separation = Math.max(minDistance, maxOverlap);
+
+            // Center parent between left and right subtrees
+            shiftTree(left, -separation / 2);
+            shiftTree(right, separation / 2);
+
+            // Merge contours
+            const leftContour = [0];
+            const rightContour = [0];
+            const maxD = Math.max(left.leftContour.length, right.leftContour.length);
+            for (let d = 0; d < maxD; d++) {
+                const lc = (d < left.leftContour.length)
+                    ? left.leftContour[d]
+                    : right.leftContour[d];
+                const rc = (d < right.rightContour.length)
+                    ? right.rightContour[d]
+                    : left.rightContour[d];
+                leftContour.push(lc);
+                rightContour.push(rc);
+            }
+
+            return {
+                node: node,
+                relX: 0,
+                leftContour: leftContour,
+                rightContour: rightContour,
+                left: left,
+                right: right
+            };
+        }
+
+        function shiftTree(item, dx) {
+            if (!item) return;
+            item.relX += dx;
+            for (let i = 0; i < item.leftContour.length; i++) item.leftContour[i] += dx;
+            for (let i = 0; i < item.rightContour.length; i++) item.rightContour[i] += dx;
+            shiftTree(item.left, dx);
+            shiftTree(item.right, dx);
+        }
+
+        const layoutRoot = buildLayout(root);
+        if (!layoutRoot) return;
+
+        // Step 2: Find minimum X to shift everything positive
+        let minX = Infinity;
+        function findMinX(item, currentX) {
+            if (!item) return;
+            const x = currentX + item.relX;
+            if (x < minX) minX = x;
+            findMinX(item.left, x);
+            findMinX(item.right, x);
+        }
+        findMinX(layoutRoot, 0);
+
+        const xShift = (minX < 80) ? (80 - minX) : 80;
+
+        const coords = this.nodeCoordinates;
+        function assignCoords(item, parentX, depth) {
+            if (!item) return;
+            const x = parentX + item.relX;
+            const y = depth * levelGap + 60;
+            coords.set(item.node.value, {
                 x: x,
                 y: y,
                 depth: depth,
-                data: node,
-                id: node.id
+                data: item.node,
+                id: item.node.id
             });
-            traverseInorder(node.right, depth + 1, coords);
+            assignCoords(item.left, x, depth + 1);
+            assignCoords(item.right, x, depth + 1);
         }
-        traverseInorder(root, 0, this.nodeCoordinates);
+
+        assignCoords(layoutRoot, xShift, 0);
     }
-
-
-
-
 
     renderTree(treeData) {
-        this.currentTree = treeData;
-        const emptyState = document.getElementById('empty-state');
-        if (!treeData || !treeData.root) {
-            this.edgesLayer.innerHTML = '';
-            this.nodesLayer.innerHTML = '';
-            this.particlesLayer.innerHTML = '';
-            this.nodeElements.clear();
-            this.edgeElements.clear();
-            this.nodeCoordinates.clear();
-            if (emptyState) emptyState.classList.remove('hidden');
-            return;
-        }
-        if (emptyState) emptyState.classList.add('hidden');
+        return new Promise(resolve => {
+            if (this._animFrameId) {
+                cancelAnimationFrame(this._animFrameId);
+                this._animFrameId = null;
+            }
 
+            this.currentTree = treeData;
+            const emptyState = document.getElementById('empty-state');
+            if (!treeData || !treeData.root) {
+                this.edgesLayer.innerHTML = '';
+                this.nodesLayer.innerHTML = '';
+                this.particlesLayer.innerHTML = '';
+                this.nodeElements.clear();
+                this.edgeElements.clear();
+                this.nodeCoordinates.clear();
+                if (emptyState) emptyState.classList.remove('hidden');
+                resolve();
+                return;
+            }
+            if (emptyState) emptyState.classList.add('hidden');
 
-        const oldPositions = new Map();
-        this.nodeCoordinates.forEach((pos, val) => {
-            oldPositions.set(val, { x: pos.x, y: pos.y });
+            const oldPositions = new Map();
+            this.nodeCoordinates.forEach((pos, val) => {
+                oldPositions.set(val, { x: pos.x, y: pos.y });
+            });
+
+            this.computeLayout(treeData.root);
+            const newPositions = new Map();
+            this.nodeCoordinates.forEach((pos, val) => {
+                newPositions.set(val, { x: pos.x, y: pos.y });
+            });
+
+            if (oldPositions.size === 0 || this.nodeElements.size === 0) {
+                this.edgesLayer.innerHTML = '';
+                this.nodesLayer.innerHTML = '';
+                this.particlesLayer.innerHTML = '';
+                this.nodeElements.clear();
+                this.edgeElements.clear();
+                this.renderEdges(treeData.root);
+                this.renderNodes(treeData.root);
+                this.centerTree();
+                resolve();
+                return;
+            }
+
+            this._tweenNodes(oldPositions, newPositions, treeData, resolve);
         });
-
-
-        this.computeLayout(treeData.root);
-        const newPositions = new Map();
-        this.nodeCoordinates.forEach((pos, val) => {
-            newPositions.set(val, { x: pos.x, y: pos.y });
-        });
-
-
-        if (oldPositions.size === 0) {
-            this.edgesLayer.innerHTML = '';
-            this.nodesLayer.innerHTML = '';
-            this.particlesLayer.innerHTML = '';
-            this.nodeElements.clear();
-            this.edgeElements.clear();
-            this.renderEdges(treeData.root);
-            this.renderNodes(treeData.root);
-            this.centerTree();
-            return;
-        }
-
-
-        this._tweenNodes(oldPositions, newPositions, treeData);
     }
 
-
-
-
-
-
-
-
-    _tweenNodes(oldPositions, newPositions, newTree) {
-        function collectNodes(node, map) {
-            if (!node) return;
-            map.set(node.value, node);
-            collectNodes(node.left, map);
-            collectNodes(node.right, map);
-        }
-
-
-        function buildParentMap(node, parentVal, parentMap) {
-            if (!node) return;
-            if (parentVal !== null) parentMap.set(node.value, parentVal);
-            buildParentMap(node.left, node.value, parentMap);
-            buildParentMap(node.right, node.value, parentMap);
-        }
+    _tweenNodes(oldPositions, newPositions, newTree, resolve) {
         const newNodeMap = new Map();
-        collectNodes(newTree.root, newNodeMap);
         const parentMap = new Map();
-        buildParentMap(newTree.root, null, parentMap);
-        const duration = 600;
-        const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
+        function collect(node, pVal) {
+            if (!node) return;
+            newNodeMap.set(node.value, node);
+            if (pVal !== null) parentMap.set(node.value, pVal);
+            collect(node.left, node.value);
+            collect(node.right, node.value);
+        }
+        collect(newTree.root, null);
 
+        const duration = 400;
+        const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
 
         const existing = [];
         const added = [];
         const removed = [];
-        newPositions.forEach((newPos, val) => {
+
+        newPositions.forEach((pos, val) => {
             if (oldPositions.has(val)) {
                 existing.push(val);
             } else {
                 added.push(val);
             }
         });
-        oldPositions.forEach((oldPos, val) => {
+        oldPositions.forEach((pos, val) => {
             if (!newPositions.has(val)) {
                 removed.push(val);
             }
         });
 
-
-        const workingPos = new Map();
-        oldPositions.forEach((p, v) => workingPos.set(v, { x: p.x, y: p.y }));
-
+        const renderStartPos = new Map();
+        existing.forEach(val => renderStartPos.set(val, oldPositions.get(val)));
+        added.forEach(val => {
+            const pVal = parentMap.get(val);
+            let sPos = (pVal !== undefined && oldPositions.has(pVal))
+                ? oldPositions.get(pVal)
+                : (pVal !== undefined && newPositions.has(pVal))
+                    ? newPositions.get(pVal)
+                    : newPositions.get(val);
+            renderStartPos.set(val, { x: sPos.x, y: sPos.y });
+        });
 
         this.edgesLayer.innerHTML = '';
         this.nodesLayer.innerHTML = '';
@@ -238,38 +358,26 @@ class TreeVisualizer {
         this.nodeElements.clear();
         this.edgeElements.clear();
 
+        const currentPos = new Map();
+        renderStartPos.forEach((p, v) => currentPos.set(v, { x: p.x, y: p.y }));
 
-        const renderStartPos = new Map();
-        existing.forEach(val => renderStartPos.set(val, oldPositions.get(val)));
-        added.forEach(val => {
-            const parentVal = parentMap.get(val);
-            const startPos = (parentVal !== null && oldPositions.has(parentVal))
-                ? oldPositions.get(parentVal)
-                : (parentVal !== null && newPositions.has(parentVal))
-                    ? newPositions.get(parentVal)
-                    : newPositions.get(val);
-            renderStartPos.set(val, startPos);
-        });
-
-
-        const savedCoords = new Map(this.nodeCoordinates);
-        renderStartPos.forEach((pos, val) => {
-            if (this.nodeCoordinates.has(val)) {
-                this.nodeCoordinates.get(val).x = pos.x;
-                this.nodeCoordinates.get(val).y = pos.y;
-            }
+        renderStartPos.forEach((p, v) => {
+            this.nodeCoordinates.set(v, { x: p.x, y: p.y, data: newNodeMap.get(v) });
         });
         this.renderEdges(newTree.root);
         this.renderNodes(newTree.root);
 
+        added.forEach(val => {
+            const el = this.nodeElements.get(val);
+            if (el) el.setAttribute('opacity', '0');
+        });
 
-        const removedEls = new Map();
+        const removedEls = [];
         removed.forEach(val => {
-            const startPos = oldPositions.get(val);
+            const sPos = oldPositions.get(val);
             const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
             group.setAttribute('class', 'star-group');
-            group.setAttribute('transform', `translate(${startPos.x}, ${startPos.y})`);
-            group.setAttribute('opacity', '1');
+            group.setAttribute('transform', `translate(${sPos.x}, ${sPos.y})`);
             const corona = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
             corona.setAttribute('class', 'star-corona');
             corona.setAttribute('r', '19');
@@ -280,89 +388,101 @@ class TreeVisualizer {
             group.appendChild(corona);
             group.appendChild(txt);
             this.nodesLayer.appendChild(group);
-            removedEls.set(val, { el: group, startPos: { ...startPos } });
+            removedEls.push(group);
         });
-
-
-        savedCoords.forEach((v, k) => this.nodeCoordinates.set(k, v));
-
-
-        added.forEach(val => {
-            const el = this.nodeElements.get(val);
-            if (el) el.setAttribute('opacity', '0');
-        });
-
 
         const startTime = performance.now();
+
         const animate = (now) => {
             const elapsed = now - startTime;
-            const rawT = Math.min(elapsed / duration, 1.0);
-            const t = easeOutCubic(rawT);
-
+            const progress = Math.min(elapsed / duration, 1.0);
+            const t = easeOutCubic(progress);
 
             existing.forEach(val => {
                 const el = this.nodeElements.get(val);
-                const oldP = oldPositions.get(val);
-                const newP = newPositions.get(val);
-                if (!el || !oldP || !newP) return;
-                const cx = oldP.x + (newP.x - oldP.x) * t;
-                const cy = oldP.y + (newP.y - oldP.y) * t;
+                const oP = oldPositions.get(val);
+                const nP = newPositions.get(val);
+                if (!el || !oP || !nP) return;
+                const cx = oP.x + (nP.x - oP.x) * t;
+                const cy = oP.y + (nP.y - oP.y) * t;
                 el.setAttribute('transform', `translate(${cx}, ${cy})`);
-                workingPos.set(val, { x: cx, y: cy });
+                currentPos.set(val, { x: cx, y: cy });
             });
-
 
             added.forEach(val => {
                 const el = this.nodeElements.get(val);
-                const startP = renderStartPos.get(val);
-                const newP = newPositions.get(val);
-                if (!el || !startP || !newP) return;
-                const cx = startP.x + (newP.x - startP.x) * t;
-                const cy = startP.y + (newP.y - startP.y) * t;
+                const sP = renderStartPos.get(val);
+                const nP = newPositions.get(val);
+                if (!el || !sP || !nP) return;
+                const cx = sP.x + (nP.x - sP.x) * t;
+                const cy = sP.y + (nP.y - sP.y) * t;
                 el.setAttribute('transform', `translate(${cx}, ${cy})`);
                 el.setAttribute('opacity', String(t));
-                workingPos.set(val, { x: cx, y: cy });
+                currentPos.set(val, { x: cx, y: cy });
             });
 
-
-            removedEls.forEach(({ el, startPos }, val) => {
-                el.setAttribute('opacity', String(1 - t));
+            removedEls.forEach(el => {
+                el.setAttribute('opacity', String(Math.max(0, 1 - t * 1.5)));
             });
-
 
             this.edgeElements.forEach((line, key) => {
-                const [fromStr, toStr] = key.split('-');
-                const fromVal = parseInt(fromStr, 10);
-                const toVal = parseInt(toStr, 10);
-                const fp = workingPos.get(fromVal);
-                const tp = workingPos.get(toVal);
-                if (fp) { line.setAttribute('x1', fp.x); line.setAttribute('y1', fp.y); }
-                if (tp) { line.setAttribute('x2', tp.x); line.setAttribute('y2', tp.y); }
+                const parts = key.split('-');
+                const pVal = parseInt(parts[0], 10);
+                const cVal = parseInt(parts[1], 10);
+                const pPos = currentPos.get(pVal);
+                const cPos = currentPos.get(cVal);
+                if (pPos) {
+                    line.setAttribute('x1', pPos.x);
+                    line.setAttribute('y1', pPos.y);
+                }
+                if (cPos) {
+                    line.setAttribute('x2', cPos.x);
+                    line.setAttribute('y2', cPos.y);
+                }
             });
-            if (rawT < 1.0) {
-                requestAnimationFrame(animate);
+
+            if (progress < 1.0) {
+                this._animFrameId = requestAnimationFrame(animate);
             } else {
-                existing.forEach(val => {
+                this._animFrameId = null;
+
+                newPositions.forEach((nP, val) => {
                     const el = this.nodeElements.get(val);
-                    const newP = newPositions.get(val);
-                    if (el && newP) el.setAttribute('transform', `translate(${newP.x}, ${newP.y})`);
-                });
-                added.forEach(val => {
-                    const el = this.nodeElements.get(val);
-                    const newP = newPositions.get(val);
-                    if (el && newP) {
-                        el.setAttribute('transform', `translate(${newP.x}, ${newP.y})`);
+                    if (el) {
+                        el.setAttribute('transform', `translate(${nP.x}, ${nP.y})`);
                         el.setAttribute('opacity', '1');
                     }
                 });
-                removedEls.forEach(({ el }) => el.remove());
 
+                this.edgeElements.forEach((line, key) => {
+                    const parts = key.split('-');
+                    const pVal = parseInt(parts[0], 10);
+                    const cVal = parseInt(parts[1], 10);
+                    const pPos = newPositions.get(pVal);
+                    const cPos = newPositions.get(cVal);
+                    if (pPos) {
+                        line.setAttribute('x1', pPos.x);
+                        line.setAttribute('y1', pPos.y);
+                    }
+                    if (cPos) {
+                        line.setAttribute('x2', cPos.x);
+                        line.setAttribute('y2', cPos.y);
+                    }
+                });
 
-                this.computeLayout(newTree.root);
+                removedEls.forEach(el => el.remove());
+
+                this.nodeCoordinates.clear();
+                newPositions.forEach((p, val) => {
+                    this.nodeCoordinates.set(val, { x: p.x, y: p.y, data: newNodeMap.get(val) });
+                });
+
                 this.centerTree();
+                if (resolve) resolve();
             }
         };
-        requestAnimationFrame(animate);
+
+        this._animFrameId = requestAnimationFrame(animate);
     }
     renderEdges(node) {
         if (!node) return;
@@ -647,7 +767,6 @@ class TreeVisualizer {
         if (rootEl) rootEl.classList.add('rotation-pivot');
         if (pivotEl) pivotEl.classList.add('active-sweep');
 
-
         let fluxArc = null;
         if (rootPos && pivotPos) {
             fluxArc = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -660,29 +779,9 @@ class TreeVisualizer {
         }
         if (window.AudioEngine) window.AudioEngine.playWarp();
 
+        // Hold visual rotation indicator briefly for comprehension
+        await new Promise(r => setTimeout(r, 600 / speedMultiplier));
 
-        if (pivotEl && pivotPos && rootPos) {
-            const tweenDuration = 700 / speedMultiplier;
-            const tweenStart = performance.now();
-            const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
-            await new Promise(resolve => {
-                function tweenStep(now) {
-                    const t = easeOutCubic(Math.min((now - tweenStart) / tweenDuration, 1.0));
-                    const cx = pivotPos.x + (rootPos.x - pivotPos.x) * t * 0.5;
-                    const cy = pivotPos.y + (rootPos.y - pivotPos.y) * t * 0.5;
-                    pivotEl.setAttribute('transform', `translate(${cx}, ${cy})`);
-                    if (t < 1.0) {
-                        requestAnimationFrame(tweenStep);
-                    } else {
-                        resolve();
-                    }
-                }
-                requestAnimationFrame(tweenStep);
-            });
-        } else {
-            await new Promise(r => setTimeout(r, 700 / speedMultiplier));
-        }
-        await new Promise(r => setTimeout(r, 300 / speedMultiplier));
         if (fluxArc) fluxArc.remove();
         if (rootEl) rootEl.classList.remove('rotation-pivot');
         if (pivotEl) pivotEl.classList.remove('active-sweep');

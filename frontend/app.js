@@ -360,15 +360,12 @@ class CosmosApp {
             });
             const data = await res.json();
             if (data.success) {
+                // Step 1: Trace insertion comparison sweep
                 if (data.searchPath && data.searchPath.length > 0) {
                     await this.visualizer.animateSearchPath(data.searchPath, true, this.speedMultiplier);
                 }
 
-
-                this.visualizer.renderTree(data.tree);
-                this.updateTelemetry(data.tree);
-
-
+                // Step 2: If AVL rebalancing occurred, show banner and directional rotation flux arc
                 if (data.tree && data.tree.lastRotations && data.tree.lastRotations.length > 0) {
                     this.showWarpBanner(data.tree.lastRotations);
                     for (const rot of data.tree.lastRotations) {
@@ -376,7 +373,7 @@ class CosmosApp {
                     }
                 }
 
-
+                // Step 3: If Splay rebalancing occurred, show splay banner and step animation
                 const splaySteps = data.splaySteps || (data.tree && data.tree.lastSplaySteps);
                 if (splaySteps && splaySteps.length > 0) {
                     this.showSplayBanner(splaySteps);
@@ -384,6 +381,11 @@ class CosmosApp {
                         await this.visualizer.animateSplayStep(step, this.speedMultiplier);
                     }
                 }
+
+                // Step 4: Smoothly render and transition the tree into its true final binary tree layout
+                await this.visualizer.renderTree(data.tree);
+                this.updateTelemetry(data.tree);
+
                 this.log('success', data.message);
                 this.inputVal.value = '';
             } else {
@@ -409,22 +411,19 @@ class CosmosApp {
             });
             const data = await res.json();
             if (data.success) {
+                // Step 1: Animate search sweep to target node
                 if (data.searchPath && data.searchPath.length > 0) {
                     await this.visualizer.animateSearchPath(data.searchPath, true, this.speedMultiplier);
                 }
 
-
+                // Step 2: Check if two-children deletion swap occurred
                 const deletionInfo = data.lastDeletion || (data.tree && data.tree.lastDeletion);
                 if (deletionInfo && deletionInfo.hasTwoChildren && deletionInfo.successorValue) {
                     this.log('warn', `[STELLAR SWAP] Target Star ${deletionInfo.targetValue} has 2 children -> Swapping with Inorder Successor Star ${deletionInfo.successorValue}`);
                     await this.visualizer.animateSwap(deletionInfo.targetValue, deletionInfo.successorValue, this.speedMultiplier);
                 }
 
-
-                this.visualizer.renderTree(data.tree);
-                this.updateTelemetry(data.tree);
-
-
+                // Step 3: If AVL rebalancing occurred, show rotation banner and flux arc
                 if (data.tree && data.tree.lastRotations && data.tree.lastRotations.length > 0) {
                     this.showWarpBanner(data.tree.lastRotations);
                     for (const rot of data.tree.lastRotations) {
@@ -432,7 +431,7 @@ class CosmosApp {
                     }
                 }
 
-
+                // Step 4: If Splay rebalancing occurred, show splay banner and step animation
                 const splaySteps = data.splaySteps || (data.tree && data.tree.lastSplaySteps);
                 if (splaySteps && splaySteps.length > 0) {
                     this.showSplayBanner(splaySteps);
@@ -440,6 +439,11 @@ class CosmosApp {
                         await this.visualizer.animateSplayStep(step, this.speedMultiplier);
                     }
                 }
+
+                // Step 5: Smoothly render and transition the tree into its true final binary tree layout
+                await this.visualizer.renderTree(data.tree);
+                this.updateTelemetry(data.tree);
+
                 this.log('success', data.message);
                 this.inputVal.value = '';
             } else {
@@ -468,16 +472,16 @@ class CosmosApp {
                 await this.visualizer.animateSearchPath(data.path, data.found, this.speedMultiplier);
             }
 
-
+            // Splay Tree: search reorganizes the tree, moving the accessed node to root
             const splaySteps = data.splaySteps || (data.tree && data.tree.lastSplaySteps);
             if (splaySteps && splaySteps.length > 0) {
                 this.showSplayBanner(splaySteps);
-                if (data.tree) {
-                    this.visualizer.renderTree(data.tree);
-                    this.updateTelemetry(data.tree);
-                }
                 for (const step of splaySteps) {
                     await this.visualizer.animateSplayStep(step, this.speedMultiplier);
+                }
+                if (data.tree) {
+                    await this.visualizer.renderTree(data.tree);
+                    this.updateTelemetry(data.tree);
                 }
             }
             if (data.found) {
@@ -504,7 +508,7 @@ class CosmosApp {
             const data = await res.json();
             if (data.success) {
                 this.currentMode = mode;
-                this.visualizer.renderTree(data.tree);
+                await this.visualizer.renderTree(data.tree);
                 this.updateTelemetry(data.tree);
                 this.log('success', `Gravitational architecture stabilized in ${mode} mode.`);
                 if (window.AudioEngine) window.AudioEngine.playWarp();
@@ -523,7 +527,7 @@ class CosmosApp {
             const res = await fetch(`${this.apiBase}/sample`, { method: 'POST' });
             const data = await res.json();
             if (data.success) {
-                this.visualizer.renderTree(data.tree);
+                await this.visualizer.renderTree(data.tree);
                 this.updateTelemetry(data.tree);
                 this.log('success', 'Harmonic constellation loaded successfully.');
                 if (window.AudioEngine) window.AudioEngine.playSuccess();
@@ -542,7 +546,7 @@ class CosmosApp {
             const res = await fetch(`${this.apiBase}/clear`, { method: 'POST' });
             const data = await res.json();
             if (data.success) {
-                this.visualizer.renderTree(data.tree);
+                await this.visualizer.renderTree(data.tree);
                 this.updateTelemetry(data.tree);
                 this.log('info', 'All star entities collapsed into the quantum void.');
                 if (window.AudioEngine) window.AudioEngine.playWarp();
