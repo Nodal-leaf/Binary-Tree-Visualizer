@@ -1,6 +1,5 @@
 #ifndef NODE_H
 #define NODE_H
-
 #include <nlohmann/json.hpp>
 #include <algorithm>
 
@@ -19,7 +18,6 @@ private:
     int id_;
     Node* left_;
     Node* right_;
-
 public:
 
 
@@ -71,6 +69,5 @@ public:
 
     nlohmann::json toJson() const;
 };
-
 #endif
 

@@ -1,6 +1,5 @@
 #include "TreeService.h"
 #include <iostream>
-
 TreeService::TreeService(const std::string& initialType) {
     if (initialType == "BST") {
         currentTree_ = std::make_unique<BST>();
@@ -8,14 +7,11 @@ TreeService::TreeService(const std::string& initialType) {
         currentTree_ = std::make_unique<AVLTree>();
     }
 }
-
 void TreeService::rebuildAsType(const std::string& targetType) {
     std::vector<int> existingValues;
     if (currentTree_) {
-
         existingValues = currentTree_->preorder();
     }
-
     if (targetType == "BST") {
         currentTree_ = std::make_unique<BST>();
     } else if (targetType == "SPLAY") {
@@ -23,15 +19,12 @@ void TreeService::rebuildAsType(const std::string& targetType) {
     } else {
         currentTree_ = std::make_unique<AVLTree>();
     }
-
     for (int val : existingValues) {
         currentTree_->insert(val);
     }
 }
-
 nlohmann::json TreeService::switchTreeType(const std::string& treeType, bool preserveData) {
     std::lock_guard<std::mutex> lock(mutex_);
-
     std::string normalized = (treeType == "BST" || treeType == "bst") ? "BST"
                            : (treeType == "SPLAY" || treeType == "splay") ? "SPLAY"
                            : "AVL";
@@ -46,22 +39,18 @@ nlohmann::json TreeService::switchTreeType(const std::string& treeType, bool pre
             currentTree_ = std::make_unique<AVLTree>();
         }
     }
-
     nlohmann::json res;
     res["success"] = true;
     res["message"] = "Switched tree mode to " + normalized;
     res["tree"] = currentTree_->toJson();
     return res;
 }
-
 nlohmann::json TreeService::insertValue(int value) {
     std::lock_guard<std::mutex> lock(mutex_);
 
 
     std::vector<int> path = currentTree_->getSearchPath(value);
-
     bool inserted = currentTree_->insert(value);
-
     nlohmann::json res;
     res["success"] = inserted;
     res["operation"] = "insert";
@@ -82,16 +71,12 @@ nlohmann::json TreeService::insertValue(int value) {
         }
         res["splaySteps"] = stepsJson;
     }
-
     return res;
 }
-
 nlohmann::json TreeService::removeValue(int value) {
     std::lock_guard<std::mutex> lock(mutex_);
-
     std::vector<int> path = currentTree_->getSearchPath(value);
     bool removed = currentTree_->remove(value);
-
     nlohmann::json res;
     res["success"] = removed;
     res["operation"] = "delete";
@@ -112,16 +97,12 @@ nlohmann::json TreeService::removeValue(int value) {
         }
         res["splaySteps"] = stepsJson;
     }
-
     return res;
 }
-
 nlohmann::json TreeService::searchValue(int value) const {
     std::lock_guard<std::mutex> lock(mutex_);
-
     std::vector<int> path = currentTree_->getSearchPath(value);
     bool found = currentTree_->search(value);
-
     nlohmann::json res;
     res["success"] = true;
     res["operation"] = "search";
@@ -141,17 +122,13 @@ nlohmann::json TreeService::searchValue(int value) const {
             stepsJson.push_back(s.toJson());
         }
         res["splaySteps"] = stepsJson;
-
         res["tree"] = currentTree_->toJson();
     }
-
     return res;
 }
-
 nlohmann::json TreeService::clearTree() {
     std::lock_guard<std::mutex> lock(mutex_);
     currentTree_->clear();
-
     nlohmann::json res;
     res["success"] = true;
     res["operation"] = "clear";
@@ -159,7 +136,6 @@ nlohmann::json TreeService::clearTree() {
     res["tree"] = currentTree_->toJson();
     return res;
 }
-
 nlohmann::json TreeService::batchInsert(const std::vector<int>& values) {
     std::lock_guard<std::mutex> lock(mutex_);
     int insertedCount = 0;
@@ -168,7 +144,6 @@ nlohmann::json TreeService::batchInsert(const std::vector<int>& values) {
             insertedCount++;
         }
     }
-
     nlohmann::json res;
     res["success"] = true;
     res["operation"] = "batch_insert";
@@ -177,7 +152,6 @@ nlohmann::json TreeService::batchInsert(const std::vector<int>& values) {
     res["tree"] = currentTree_->toJson();
     return res;
 }
-
 nlohmann::json TreeService::getTreeState() const {
     std::lock_guard<std::mutex> lock(mutex_);
     nlohmann::json res;
@@ -185,13 +159,11 @@ nlohmann::json TreeService::getTreeState() const {
     res["tree"] = currentTree_->toJson();
     return res;
 }
-
 nlohmann::json TreeService::getTraversal(const std::string& type) const {
     std::lock_guard<std::mutex> lock(mutex_);
     nlohmann::json res;
     res["success"] = true;
     res["type"] = type;
-
     if (type == "inorder") {
         res["sequence"] = currentTree_->inorder();
     } else if (type == "preorder") {
@@ -203,10 +175,8 @@ nlohmann::json TreeService::getTraversal(const std::string& type) const {
         res["message"] = "Invalid traversal type: " + type;
         return res;
     }
-
     return res;
 }
-
 nlohmann::json TreeService::loadSample() {
     std::lock_guard<std::mutex> lock(mutex_);
     currentTree_->clear();
@@ -214,7 +184,6 @@ nlohmann::json TreeService::loadSample() {
     for (int v : sampleValues) {
         currentTree_->insert(v);
     }
-
     nlohmann::json res;
     res["success"] = true;
     res["operation"] = "sample";

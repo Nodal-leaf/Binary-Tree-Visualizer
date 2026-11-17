@@ -1,20 +1,16 @@
 #include "BinarySearchTree.h"
 #include <algorithm>
-
 BinarySearchTree::BinarySearchTree()
     : root_(nullptr), nodeCount_(0), nextNodeId_(1) {}
-
 BinarySearchTree::~BinarySearchTree() {
     destroySubtree(root_);
     root_ = nullptr;
     nodeCount_ = 0;
 }
-
 BinarySearchTree::BinarySearchTree(const BinarySearchTree& other)
     : root_(nullptr), nodeCount_(other.nodeCount_), nextNodeId_(other.nextNodeId_) {
     root_ = cloneSubtree(other.root_);
 }
-
 BinarySearchTree& BinarySearchTree::operator=(const BinarySearchTree& other) {
     if (this != &other) {
         destroySubtree(root_);
@@ -24,28 +20,24 @@ BinarySearchTree& BinarySearchTree::operator=(const BinarySearchTree& other) {
     }
     return *this;
 }
-
 BinarySearchTree::BinarySearchTree(BinarySearchTree&& other) noexcept
     : root_(other.root_), nodeCount_(other.nodeCount_), nextNodeId_(other.nextNodeId_) {
     other.root_ = nullptr;
     other.nodeCount_ = 0;
     other.nextNodeId_ = 1;
 }
-
 BinarySearchTree& BinarySearchTree::operator=(BinarySearchTree&& other) noexcept {
     if (this != &other) {
         destroySubtree(root_);
         root_ = other.root_;
         nodeCount_ = other.nodeCount_;
         nextNodeId_ = other.nextNodeId_;
-
         other.root_ = nullptr;
         other.nodeCount_ = 0;
         other.nextNodeId_ = 1;
     }
     return *this;
 }
-
 void BinarySearchTree::destroySubtree(Node* node) {
     if (node != nullptr) {
         destroySubtree(node->getLeft());
@@ -53,7 +45,6 @@ void BinarySearchTree::destroySubtree(Node* node) {
         delete node;
     }
 }
-
 Node* BinarySearchTree::cloneSubtree(const Node* node) {
     if (node == nullptr) {
         return nullptr;
@@ -64,15 +55,12 @@ Node* BinarySearchTree::cloneSubtree(const Node* node) {
     newNode->setRight(cloneSubtree(node->getRight()));
     return newNode;
 }
-
 int BinarySearchTree::getNodeHeight(const Node* node) const {
     return (node != nullptr) ? node->getHeight() : 0;
 }
-
 int BinarySearchTree::calculateBalance(const Node* node) const {
     return (node != nullptr) ? node->getBalanceFactor() : 0;
 }
-
 bool BinarySearchTree::search(int value) const {
     const Node* current = root_;
     while (current != nullptr) {
@@ -86,7 +74,6 @@ bool BinarySearchTree::search(int value) const {
     }
     return false;
 }
-
 std::vector<int> BinarySearchTree::getSearchPath(int value) const {
     std::vector<int> path;
     const Node* current = root_;
@@ -102,7 +89,6 @@ std::vector<int> BinarySearchTree::getSearchPath(int value) const {
     }
     return path;
 }
-
 void BinarySearchTree::inorderRecursive(const Node* node, std::vector<int>& result) const {
     if (node != nullptr) {
         inorderRecursive(node->getLeft(), result);
@@ -110,13 +96,11 @@ void BinarySearchTree::inorderRecursive(const Node* node, std::vector<int>& resu
         inorderRecursive(node->getRight(), result);
     }
 }
-
 std::vector<int> BinarySearchTree::inorder() const {
     std::vector<int> result;
     inorderRecursive(root_, result);
     return result;
 }
-
 void BinarySearchTree::preorderRecursive(const Node* node, std::vector<int>& result) const {
     if (node != nullptr) {
         result.push_back(node->getValue());
@@ -124,13 +108,11 @@ void BinarySearchTree::preorderRecursive(const Node* node, std::vector<int>& res
         preorderRecursive(node->getRight(), result);
     }
 }
-
 std::vector<int> BinarySearchTree::preorder() const {
     std::vector<int> result;
     preorderRecursive(root_, result);
     return result;
 }
-
 void BinarySearchTree::postorderRecursive(const Node* node, std::vector<int>& result) const {
     if (node != nullptr) {
         postorderRecursive(node->getLeft(), result);
@@ -138,36 +120,29 @@ void BinarySearchTree::postorderRecursive(const Node* node, std::vector<int>& re
         result.push_back(node->getValue());
     }
 }
-
 std::vector<int> BinarySearchTree::postorder() const {
     std::vector<int> result;
     postorderRecursive(root_, result);
     return result;
 }
-
 int BinarySearchTree::getHeight() const {
     return getNodeHeight(root_);
 }
-
 int BinarySearchTree::getNodeCount() const {
     return nodeCount_;
 }
-
 bool BinarySearchTree::isEmpty() const {
     return root_ == nullptr;
 }
-
 void BinarySearchTree::clear() {
     destroySubtree(root_);
     root_ = nullptr;
     nodeCount_ = 0;
     nextNodeId_ = 1;
 }
-
 const Node* BinarySearchTree::getRoot() const {
     return root_;
 }
-
 nlohmann::json BinarySearchTree::toJson() const {
     nlohmann::json j;
     j["treeType"] = getTreeType();
@@ -177,13 +152,11 @@ nlohmann::json BinarySearchTree::toJson() const {
     j["preorder"] = preorder();
     j["postorder"] = postorder();
     j["lastDeletion"] = lastDeletion_.toJson();
-
     if (root_ != nullptr) {
         j["root"] = root_->toJson();
     } else {
         j["root"] = nullptr;
     }
-
     return j;
 }
 

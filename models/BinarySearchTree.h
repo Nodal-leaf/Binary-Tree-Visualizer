@@ -1,6 +1,5 @@
 #ifndef BINARY_SEARCH_TREE_H
 #define BINARY_SEARCH_TREE_H
-
 #include "Node.h"
 #include <vector>
 #include <string>
@@ -21,7 +20,6 @@ protected:
     Node* root_;
     int nodeCount_;
     int nextNodeId_;
-
 public:
 
 
@@ -32,7 +30,6 @@ public:
         bool hasTwoChildren = false;
         int successorValue = 0;
         std::string description;
-
         nlohmann::json toJson() const {
             return {
                 {"occurred", occurred},
@@ -43,7 +40,6 @@ public:
             };
         }
     };
-
 protected:
     DeletionEvent lastDeletion_;
 
@@ -52,11 +48,9 @@ protected:
     Node* cloneSubtree(const Node* node);
     int getNodeHeight(const Node* node) const;
     int calculateBalance(const Node* node) const;
-
     void inorderRecursive(const Node* node, std::vector<int>& result) const;
     void preorderRecursive(const Node* node, std::vector<int>& result) const;
     void postorderRecursive(const Node* node, std::vector<int>& result) const;
-
 public:
 
 
@@ -167,6 +161,5 @@ public:
 
     virtual nlohmann::json toJson() const;
 };
-
 #endif
 

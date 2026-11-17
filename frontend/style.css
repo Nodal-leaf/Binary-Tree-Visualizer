@@ -12,23 +12,19 @@
     --neon-cyan: #00ff66;
     --neon-emerald: #00ff66;
     --neon-gold: #ffff33;
-    
     --border-dim: rgba(0, 255, 102, 0.25);
     --border-bright: #00ff66;
     --text-primary: #00ff66;
     --text-white: #ffffff;
     --text-muted: #557766;
-
     --font-mono: 'JetBrains Mono', monospace;
     --font-sans: 'Inter', sans-serif;
 }
-
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
-
 body {
     background-color: var(--bg-black);
     color: var(--text-primary);
@@ -71,7 +67,6 @@ body {
     background: var(--neon-green);
     border-radius: 2px;
 }
-
 .divider {
     width: 1px;
     height: 22px;
@@ -98,18 +93,15 @@ body {
     justify-content: center;
     outline: none;
 }
-
 .btn:hover:not(:disabled) {
     background: var(--neon-green);
     color: #000000;
     border-color: var(--neon-green);
     box-shadow: 0 0 14px rgba(0, 255, 102, 0.8);
 }
-
 .btn:active:not(:disabled) {
     transform: scale(0.96);
 }
-
 .btn:disabled {
     opacity: 0.35;
     cursor: not-allowed;
@@ -121,7 +113,6 @@ body {
 .btn-primary {
     border-color: rgba(0, 255, 102, 0.5);
 }
-
 .btn-danger {
     color: var(--neon-red);
     border-color: rgba(255, 51, 102, 0.35);
@@ -132,12 +123,10 @@ body {
     border-color: var(--neon-red);
     box-shadow: 0 0 14px rgba(255, 51, 102, 0.8);
 }
-
 .btn-icon {
     padding: 6px 9px;
     font-size: 14px;
 }
-
 .btn-sm {
     padding: 3px 8px;
     font-size: 11px;
@@ -149,7 +138,6 @@ body {
     gap: 4px;
     align-items: center;
 }
-
 .mode-btn.active {
     background: var(--neon-green);
     color: #000000;
@@ -164,7 +152,6 @@ body {
     align-items: center;
     gap: 6px;
 }
-
 #node-value-input {
     background: #000000;
     color: var(--neon-green);
@@ -178,12 +165,10 @@ body {
     outline: none;
     transition: all 0.18s ease;
 }
-
 #node-value-input:focus {
     border-color: var(--neon-green);
     box-shadow: 0 0 12px rgba(0, 255, 102, 0.5);
 }
-
 #node-value-input::placeholder {
     color: rgba(0, 255, 102, 0.4);
 }
@@ -198,12 +183,10 @@ body {
     padding: 0 4px;
     white-space: nowrap;
 }
-
 .stat-pill b {
     color: var(--neon-green);
     font-weight: 700;
 }
-
 .status-dot {
     width: 8px;
     height: 8px;
@@ -212,7 +195,6 @@ body {
     box-shadow: 0 0 8px var(--neon-green);
     display: inline-block;
 }
-
 .status-dot.offline {
     background: var(--neon-red);
     box-shadow: 0 0 8px var(--neon-red);
@@ -231,11 +213,9 @@ body {
     z-index: 10;
     cursor: grab;
 }
-
 #svg-container:active {
     cursor: grabbing;
 }
-
 #tree-svg {
     width: 100%;
     height: 100%;
@@ -252,7 +232,6 @@ body {
     filter: drop-shadow(0 0 5px rgba(0, 255, 102, 0.7));
     transition: stroke 0.25s ease, stroke-width 0.25s ease, stroke-opacity 0.25s ease;
 }
-
 .constellation-edge.highlighted {
     stroke: #ffffff;
     stroke-width: 3.5px;
@@ -275,7 +254,6 @@ body {
     animation: rotateRing 14s linear infinite;
     transform-origin: center;
 }
-
 @keyframes rotateRing {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
@@ -310,7 +288,6 @@ body {
     rx: 3;
     ry: 3;
 }
-
 .satellite-text {
     font-family: var(--font-mono);
     font-size: 9px;
@@ -377,18 +354,15 @@ body {
     filter: drop-shadow(0 0 10px var(--neon-green));
     animation: dashStream 1s linear infinite;
 }
-
 @keyframes dashStream {
     to { stroke-dashoffset: -18; }
 }
-
 .transfer-particle {
     fill: #000000;
     stroke: var(--neon-green);
     stroke-width: 2px;
     filter: drop-shadow(0 0 10px var(--neon-green));
 }
-
 .rotation-flux-arc {
     fill: none;
     stroke: var(--neon-yellow);
@@ -415,7 +389,6 @@ body {
     stroke: #bd00ff;
     filter: drop-shadow(0 0 16px #bd00ff);
 }
-
 .star-group.splay-step .star-key-text {
     fill: #bd00ff;
 }
@@ -425,7 +398,6 @@ body {
     stroke: #39ff14;
     animation: newRootPulse 0.5s ease;
 }
-
 @keyframes newRootPulse {
     0%, 100% { r: 19px; }
     50%       { r: 24px; }
@@ -449,7 +421,6 @@ body {
     flex-direction: column;
     gap: 6px;
 }
-
 .ctrl-btn {
     width: 36px;
     height: 36px;
@@ -468,7 +439,6 @@ body {
     backdrop-filter: blur(8px);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
 }
-
 .ctrl-btn:hover {
     background: var(--neon-green);
     color: #000000;
@@ -496,13 +466,11 @@ body {
     backdrop-filter: blur(10px);
     transition: opacity 0.3s ease, transform 0.3s ease;
 }
-
 .minimal-toast.hidden {
     opacity: 0;
     transform: translateX(-50%) translateY(20px);
     pointer-events: none;
 }
-
 .toast-badge {
     background: var(--neon-yellow);
     color: #000000;
@@ -512,18 +480,15 @@ body {
     border-radius: 3px;
     letter-spacing: 0.5px;
 }
-
 .toast-text {
     display: flex;
     flex-direction: column;
 }
-
 .toast-title {
     color: var(--text-white);
     font-weight: 700;
     font-size: 13px;
 }
-
 .toast-desc {
     color: var(--text-muted);
     font-size: 11px;
@@ -549,25 +514,21 @@ body {
     backdrop-filter: blur(10px);
     max-width: 85vw;
 }
-
 .minimal-traversal-bar.hidden {
     display: none;
 }
-
 .traversal-title {
     font-weight: 700;
     font-size: 12px;
     color: var(--neon-green);
     letter-spacing: 0.5px;
 }
-
 .traversal-chips {
     display: flex;
     gap: 6px;
     overflow-x: auto;
     padding: 2px 0;
 }
-
 .traversal-chip, .star-chip {
     background: #000000;
     border: 1px solid var(--border-dim);
@@ -578,14 +539,12 @@ body {
     border-radius: 4px;
     white-space: nowrap;
 }
-
 .traversal-chip.active, .star-chip.active {
     background: var(--neon-green);
     color: #000000;
     border-color: var(--neon-green);
     box-shadow: 0 0 10px var(--neon-green);
 }
-
 .close-btn {
     background: transparent;
     border: none;
@@ -596,7 +555,6 @@ body {
     border-radius: 3px;
     transition: color 0.15s ease;
 }
-
 .close-btn:hover {
     color: var(--text-white);
 }
@@ -616,18 +574,15 @@ body {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.9), 0 0 15px rgba(0, 255, 102, 0.1);
     backdrop-filter: blur(10px);
 }
-
 .minimal-node-card.hidden {
     display: none;
 }
-
 .node-card-content {
     display: flex;
     align-items: center;
     gap: 10px;
     font-size: 12px;
 }
-
 .node-badge {
     color: var(--text-muted);
 }
@@ -635,7 +590,6 @@ body {
     color: var(--text-white);
     font-size: 14px;
 }
-
 .node-meta b {
     color: var(--neon-green);
 }
@@ -657,11 +611,9 @@ body {
     align-items: center;
     gap: 8px;
 }
-
 .empty-state.hidden {
     display: none;
 }
-
 .empty-glow {
     font-size: 28px;
     color: var(--neon-green);

@@ -1,45 +1,36 @@
 #include "BST.h"
 #include <algorithm>
-
 BST::BST() : BinarySearchTree() {}
-
 std::string BST::getTreeType() const {
     return "BST";
 }
-
 void BST::updateHeight(Node* node) {
     if (node != nullptr) {
         node->setHeight(1 + std::max(getNodeHeight(node->getLeft()), getNodeHeight(node->getRight())));
     }
 }
-
 Node* BST::findMin(Node* current) const {
     while (current != nullptr && current->getLeft() != nullptr) {
         current = current->getLeft();
     }
     return current;
 }
-
 Node* BST::insertHelper(Node* current, int value, bool& inserted) {
     if (current == nullptr) {
         inserted = true;
         return new Node(value, nextNodeId_++);
     }
-
     if (value < current->getValue()) {
         current->setLeft(insertHelper(current->getLeft(), value, inserted));
     } else if (value > current->getValue()) {
         current->setRight(insertHelper(current->getRight(), value, inserted));
     } else {
-
         inserted = false;
         return current;
     }
-
     updateHeight(current);
     return current;
 }
-
 bool BST::insert(int value) {
     bool inserted = false;
     root_ = insertHelper(root_, value, inserted);
@@ -48,19 +39,16 @@ bool BST::insert(int value) {
     }
     return inserted;
 }
-
 Node* BST::removeHelper(Node* current, int value, bool& removed) {
     if (current == nullptr) {
         removed = false;
         return nullptr;
     }
-
     if (value < current->getValue()) {
         current->setLeft(removeHelper(current->getLeft(), value, removed));
     } else if (value > current->getValue()) {
         current->setRight(removeHelper(current->getRight(), value, removed));
     } else {
-
         removed = true;
 
 
@@ -93,17 +81,13 @@ Node* BST::removeHelper(Node* current, int value, bool& removed) {
         lastDeletion_.successorValue = successor->getValue();
         lastDeletion_.description = "Target node " + std::to_string(value) + " has 2 children: swapped with inorder successor " + 
                                     std::to_string(successor->getValue()) + " (minimum of right subtree).";
-
         current->setValue(successor->getValue());
-
         bool dummyRemoved = false;
         current->setRight(removeHelper(current->getRight(), successor->getValue(), dummyRemoved));
     }
-
     updateHeight(current);
     return current;
 }
-
 bool BST::remove(int value) {
     clearLastDeletion();
     bool removed = false;

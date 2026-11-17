@@ -1,6 +1,5 @@
 #ifndef AVL_TREE_H
 #define AVL_TREE_H
-
 #include "BinarySearchTree.h"
 #include <vector>
 #include <string>
@@ -28,7 +27,6 @@ public:
         std::string description;
         nlohmann::json treeBefore;
         nlohmann::json treeAfter;
-
         nlohmann::json toJson() const {
             return {
                 {"type", type},
@@ -42,7 +40,6 @@ public:
             };
         }
     };
-
 private:
     std::vector<RotationStep> lastRotations_;
 
@@ -58,7 +55,6 @@ private:
     Node* removeHelper(Node* current, int value, bool& removed);
     Node* findMin(Node* current) const;
     void updateHeight(Node* node);
-
 public:
     AVLTree();
     ~AVLTree() override = default;
@@ -97,6 +93,5 @@ public:
 
     nlohmann::json toJson() const override;
 };
-
 #endif
 

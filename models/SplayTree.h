@@ -1,6 +1,5 @@
 #ifndef SPLAY_TREE_H
 #define SPLAY_TREE_H
-
 #include "BinarySearchTree.h"
 #include <vector>
 #include <string>
@@ -28,7 +27,6 @@ public:
         int accessedValue;
         int newRootValue;
         std::string description;
-
         nlohmann::json toJson() const {
             return {
                 {"type",          type},
@@ -38,7 +36,6 @@ public:
             };
         }
     };
-
 private:
     mutable std::vector<SplayStep> lastSplaySteps_;
 
@@ -61,7 +58,6 @@ private:
 
 
     void updateHeight(Node* node);
-
 public:
     SplayTree();
     ~SplayTree() override = default;
@@ -107,5 +103,4 @@ public:
 
     nlohmann::json toJson() const override;
 };
-
 #endif

@@ -6,22 +6,18 @@
 (function() {
     const canvas = document.getElementById('cosmic-canvas');
     if (!canvas) return;
-
     const ctx = canvas.getContext('2d');
     let width = 0;
     let height = 0;
-
     const STAR_COUNT = 240;
     const NEBULA_COUNT = 4;
     const stars = [];
     const nebulae = [];
     const shootingStars = [];
-
     function resize() {
         width = canvas.width = window.innerWidth;
         height = canvas.height = window.innerHeight;
     }
-
     window.addEventListener('resize', resize);
     resize();
 
@@ -47,7 +43,6 @@
         { r: 0, g: 80, b: 200, a: 0.06 },
         { r: 255, g: 0, b: 128, a: 0.03 }
     ];
-
     for (let i = 0; i < NEBULA_COUNT; i++) {
         nebulae.push({
             x: Math.random() * width,
@@ -73,7 +68,6 @@
             });
         }
     }
-
     function render() {
         ctx.clearRect(0, 0, width, height);
 
@@ -82,13 +76,11 @@
             neb.angle += neb.speed;
             const curX = neb.x + Math.cos(neb.angle) * 40;
             const curY = neb.y + Math.sin(neb.angle) * 40;
-
             const grad = ctx.createRadialGradient(curX, curY, 0, curX, curY, neb.radius);
             const { r, g, b, a } = neb.color;
             grad.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${a * 1.5})`);
             grad.addColorStop(0.5, `rgba(${r}, ${g}, ${b}, ${a})`);
             grad.addColorStop(1, 'rgba(2, 4, 10, 0)');
-
             ctx.fillStyle = grad;
             ctx.beginPath();
             ctx.arc(curX, curY, neb.radius, 0, Math.PI * 2);
@@ -101,14 +93,12 @@
             if (star.alpha > 1 || star.alpha < 0.15) {
                 star.twinkleSpeed = -star.twinkleSpeed;
             }
-
             star.x += star.vx;
             star.y += star.vy;
             if (star.x < 0) star.x = width;
             if (star.x > width) star.x = 0;
             if (star.y < 0) star.y = height;
             if (star.y > height) star.y = 0;
-
             ctx.save();
             ctx.globalAlpha = star.alpha;
             ctx.fillStyle = star.color;
@@ -134,21 +124,17 @@
             ss.x += Math.cos(ss.angle) * ss.speed;
             ss.y += Math.sin(ss.angle) * ss.speed;
             ss.opacity -= ss.decay;
-
             if (ss.opacity <= 0 || ss.x > width || ss.y > height) {
                 shootingStars.splice(i, 1);
                 continue;
             }
-
             ctx.save();
             ctx.globalAlpha = ss.opacity;
             const tailX = ss.x - Math.cos(ss.angle) * ss.length;
             const tailY = ss.y - Math.sin(ss.angle) * ss.length;
-
             const grad = ctx.createLinearGradient(tailX, tailY, ss.x, ss.y);
             grad.addColorStop(0, 'rgba(0, 242, 254, 0)');
             grad.addColorStop(1, '#ffffff');
-
             ctx.strokeStyle = grad;
             ctx.lineWidth = 2;
             ctx.beginPath();
@@ -157,10 +143,8 @@
             ctx.stroke();
             ctx.restore();
         }
-
         requestAnimationFrame(render);
     }
-
     render();
 })();
 

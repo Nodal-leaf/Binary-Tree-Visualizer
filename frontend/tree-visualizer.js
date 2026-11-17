@@ -11,7 +11,6 @@ class TreeVisualizer {
         this.edgesLayer = document.getElementById('edges-layer');
         this.nodesLayer = document.getElementById('nodes-layer');
         this.particlesLayer = document.getElementById('particles-layer');
-
         this.onNodeClick = options.onNodeClick || null;
 
 
@@ -27,38 +26,30 @@ class TreeVisualizer {
         this.nodeCoordinates = new Map();
         this.nodeElements = new Map();
         this.edgeElements = new Map();
-
         this.initPanZoom();
     }
-
     initPanZoom() {
         const container = this.svg.parentElement;
-
         container.addEventListener('mousedown', (e) => {
-
             if (e.target.closest('.star-group')) return;
             this.isDragging = true;
             this.startX = e.clientX - this.panX;
             this.startY = e.clientY - this.panY;
         });
-
         window.addEventListener('mousemove', (e) => {
             if (!this.isDragging) return;
             this.panX = e.clientX - this.startX;
             this.panY = e.clientY - this.startY;
             this.updateTransform();
         });
-
         window.addEventListener('mouseup', () => {
             this.isDragging = false;
         });
-
         container.addEventListener('wheel', (e) => {
             e.preventDefault();
             const zoomFactor = 1.1;
             const mouseX = e.offsetX;
             const mouseY = e.offsetY;
-
             let newScale = (e.deltaY < 0) ? this.scale * zoomFactor : this.scale / zoomFactor;
             newScale = Math.min(Math.max(newScale, 0.3), 3.0);
 
@@ -66,27 +57,22 @@ class TreeVisualizer {
             this.panX -= (mouseX - this.panX) * (newScale / this.scale - 1);
             this.panY -= (mouseY - this.panY) * (newScale / this.scale - 1);
             this.scale = newScale;
-
             this.updateTransform();
         }, { passive: false });
     }
-
     updateTransform() {
         this.viewportGroup.setAttribute('transform', 
             `translate(${this.panX}, ${this.panY}) scale(${this.scale})`
         );
     }
-
     zoomIn() {
         this.scale = Math.min(this.scale * 1.2, 3.0);
         this.updateTransform();
     }
-
     zoomOut() {
         this.scale = Math.max(this.scale / 1.2, 0.3);
         this.updateTransform();
     }
-
     resetView() {
         this.scale = 1.0;
         this.panX = 0;
@@ -94,7 +80,6 @@ class TreeVisualizer {
         this.centerTree();
         this.updateTransform();
     }
-
     centerTree() {
         if (!this.currentTree || !this.currentTree.root) {
             this.panX = 0;
@@ -102,17 +87,14 @@ class TreeVisualizer {
             this.updateTransform();
             return;
         }
-
         const rect = this.svg.getBoundingClientRect();
         let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-
         this.nodeCoordinates.forEach(pos => {
             if (pos.x < minX) minX = pos.x;
             if (pos.x > maxX) maxX = pos.x;
             if (pos.y < minY) minY = pos.y;
             if (pos.y > maxY) maxY = pos.y;
         });
-
         if (minX !== Infinity) {
             const treeWidth = maxX - minX;
             const treeCenterX = (minX + maxX) / 2;
@@ -129,19 +111,15 @@ class TreeVisualizer {
     computeLayout(root) {
         this.nodeCoordinates.clear();
         if (!root) return;
-
         let index = 0;
         const levelGap = 85;
         const nodeSpacing = 68;
-
         function traverseInorder(node, depth, coords) {
             if (!node) return;
             traverseInorder(node.left, depth + 1, coords);
-
             const x = index * nodeSpacing + 60;
             const y = depth * levelGap + 50;
             index++;
-
             coords.set(node.value, {
                 x: x,
                 y: y,
@@ -149,10 +127,8 @@ class TreeVisualizer {
                 data: node,
                 id: node.id
             });
-
             traverseInorder(node.right, depth + 1, coords);
         }
-
         traverseInorder(root, 0, this.nodeCoordinates);
     }
 
@@ -162,7 +138,6 @@ class TreeVisualizer {
 
     renderTree(treeData) {
         this.currentTree = treeData;
-
         const emptyState = document.getElementById('empty-state');
         if (!treeData || !treeData.root) {
             this.edgesLayer.innerHTML = '';
@@ -214,7 +189,6 @@ class TreeVisualizer {
 
 
     _tweenNodes(oldPositions, newPositions, newTree) {
-
         function collectNodes(node, map) {
             if (!node) return;
             map.set(node.value, node);
@@ -229,12 +203,10 @@ class TreeVisualizer {
             buildParentMap(node.left, node.value, parentMap);
             buildParentMap(node.right, node.value, parentMap);
         }
-
         const newNodeMap = new Map();
         collectNodes(newTree.root, newNodeMap);
         const parentMap = new Map();
         buildParentMap(newTree.root, null, parentMap);
-
         const duration = 600;
         const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
 
@@ -242,7 +214,6 @@ class TreeVisualizer {
         const existing = [];
         const added = [];
         const removed = [];
-
         newPositions.forEach((newPos, val) => {
             if (oldPositions.has(val)) {
                 existing.push(val);
@@ -288,14 +259,12 @@ class TreeVisualizer {
                 this.nodeCoordinates.get(val).y = pos.y;
             }
         });
-
         this.renderEdges(newTree.root);
         this.renderNodes(newTree.root);
 
 
         const removedEls = new Map();
         removed.forEach(val => {
-
             const startPos = oldPositions.get(val);
             const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
             group.setAttribute('class', 'star-group');
@@ -325,7 +294,6 @@ class TreeVisualizer {
 
 
         const startTime = performance.now();
-
         const animate = (now) => {
             const elapsed = now - startTime;
             const rawT = Math.min(elapsed / duration, 1.0);
@@ -371,11 +339,9 @@ class TreeVisualizer {
                 if (fp) { line.setAttribute('x1', fp.x); line.setAttribute('y1', fp.y); }
                 if (tp) { line.setAttribute('x2', tp.x); line.setAttribute('y2', tp.y); }
             });
-
             if (rawT < 1.0) {
                 requestAnimationFrame(animate);
             } else {
-
                 existing.forEach(val => {
                     const el = this.nodeElements.get(val);
                     const newP = newPositions.get(val);
@@ -396,28 +362,22 @@ class TreeVisualizer {
                 this.centerTree();
             }
         };
-
         requestAnimationFrame(animate);
     }
-
     renderEdges(node) {
         if (!node) return;
-
         const parentPos = this.nodeCoordinates.get(node.value);
-
         if (node.left) {
             const leftPos = this.nodeCoordinates.get(node.left.value);
             this.createEdge(parentPos, leftPos, node.value, node.left.value);
             this.renderEdges(node.left);
         }
-
         if (node.right) {
             const rightPos = this.nodeCoordinates.get(node.right.value);
             this.createEdge(parentPos, rightPos, node.value, node.right.value);
             this.renderEdges(node.right);
         }
     }
-
     createEdge(fromPos, toPos, fromVal, toVal) {
         const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
         line.setAttribute('x1', fromPos.x);
@@ -426,16 +386,12 @@ class TreeVisualizer {
         line.setAttribute('y2', toPos.y);
         line.setAttribute('class', 'constellation-edge');
         line.setAttribute('id', `edge-${fromVal}-${toVal}`);
-
         this.edgesLayer.appendChild(line);
         this.edgeElements.set(`${fromVal}-${toVal}`, line);
     }
-
     renderNodes(node) {
         if (!node) return;
-
         const pos = this.nodeCoordinates.get(node.value);
-
         const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
         group.setAttribute('class', 'star-group');
         group.setAttribute('transform', `translate(${pos.x}, ${pos.y})`);
@@ -473,7 +429,6 @@ class TreeVisualizer {
         const pillGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
         pillGroup.setAttribute('class', 'satellite-pill');
         pillGroup.setAttribute('transform', 'translate(14, -22)');
-
         const pillRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
         pillRect.setAttribute('class', 'satellite-rect');
         pillRect.setAttribute('x', '-12');
@@ -481,14 +436,12 @@ class TreeVisualizer {
         pillRect.setAttribute('width', '38');
         pillRect.setAttribute('height', '16');
         pillRect.setAttribute('style', `stroke: ${pillColor};`);
-
         const pillText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
         pillText.setAttribute('class', 'satellite-text');
         pillText.setAttribute('x', '7');
         pillText.setAttribute('y', '0');
         pillText.setAttribute('style', `fill: ${pillColor};`);
         pillText.textContent = `BF:${bf >= 0 ? '+' : ''}${bf}`;
-
         pillGroup.appendChild(pillRect);
         pillGroup.appendChild(pillText);
 
@@ -506,7 +459,6 @@ class TreeVisualizer {
                 this.onNodeClick(node);
             }
         });
-
         this.nodesLayer.appendChild(group);
         this.nodeElements.set(node.value, group);
 
@@ -514,7 +466,6 @@ class TreeVisualizer {
         this.renderNodes(node.left);
         this.renderNodes(node.right);
     }
-
     highlightNodeSelection(value) {
         document.querySelectorAll('.star-group').forEach(g => g.classList.remove('active-target'));
         const el = this.nodeElements.get(value);
@@ -522,7 +473,6 @@ class TreeVisualizer {
             el.classList.add('active-target');
         }
     }
-
     clearHighlights() {
         document.querySelectorAll('.star-group').forEach(g => {
             g.classList.remove('active-sweep', 'active-target', 'rotation-pivot');
@@ -538,14 +488,11 @@ class TreeVisualizer {
     async animateSearchPath(path, found, speedMultiplier = 1.0) {
         this.clearHighlights();
         const baseDelay = 450 / speedMultiplier;
-
         for (let i = 0; i < path.length; i++) {
             const val = path[i];
             const nodeEl = this.nodeElements.get(val);
-
             if (nodeEl) {
                 nodeEl.classList.add('active-sweep');
-
                 if (window.AudioEngine) window.AudioEngine.playNodeHover(val);
             }
 
@@ -557,7 +504,6 @@ class TreeVisualizer {
                 const edgeEl = this.edgeElements.get(edgeKey1) || this.edgeElements.get(edgeKey2);
                 if (edgeEl) edgeEl.classList.add('highlighted');
             }
-
             await new Promise(r => setTimeout(r, baseDelay));
             if (nodeEl && i < path.length - 1) {
                 nodeEl.classList.remove('active-sweep');
@@ -589,13 +535,11 @@ class TreeVisualizer {
         const successorEl = this.nodeElements.get(successorVal);
         const targetPos = this.nodeCoordinates.get(targetVal);
         const successorPos = this.nodeCoordinates.get(successorVal);
-
         if (!targetEl || !successorEl || !targetPos || !successorPos) return;
 
 
         targetEl.classList.add('collapsing-target');
         successorEl.classList.add('inorder-successor');
-
         if (window.AudioEngine) window.AudioEngine.playNodeHover(successorVal);
 
 
@@ -612,17 +556,14 @@ class TreeVisualizer {
         const orb = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
         orb.setAttribute('r', '15');
         orb.setAttribute('class', 'transfer-particle');
-
         const orbText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
         orbText.setAttribute('class', 'star-key-text');
         orbText.setAttribute('style', 'font-size: 11px; fill: #000000; font-weight: 800;');
         orbText.textContent = successorVal;
-
         orbGroup.appendChild(orb);
         orbGroup.appendChild(orbText);
         orbGroup.setAttribute('transform', `translate(${successorPos.x}, ${successorPos.y})`);
         this.particlesLayer.appendChild(orbGroup);
-
         const duration = 1200 / speedMultiplier;
         const startTime = performance.now();
 
@@ -636,7 +577,6 @@ class TreeVisualizer {
                 const curX = Math.pow(1 - t, 2) * successorPos.x + 2 * (1 - t) * t * midX + Math.pow(t, 2) * targetPos.x;
                 const curY = Math.pow(1 - t, 2) * successorPos.y + 2 * (1 - t) * t * midY + Math.pow(t, 2) * targetPos.y;
                 orbGroup.setAttribute('transform', `translate(${curX}, ${curY})`);
-
                 if (t < 1.0) {
                     requestAnimationFrame(step);
                 } else {
@@ -649,7 +589,6 @@ class TreeVisualizer {
 
         const targetText = targetEl.querySelector('.star-key-text');
         if (targetText) {
-
             const bounceDuration = 300 / speedMultiplier;
             const bounceStart = performance.now();
             await new Promise(resolve => {
@@ -690,9 +629,7 @@ class TreeVisualizer {
 
         path.remove();
         orbGroup.remove();
-
         await new Promise(r => setTimeout(r, 450 / speedMultiplier));
-
         targetEl.classList.remove('collapsing-target');
         successorEl.classList.remove('inorder-successor');
     }
@@ -707,7 +644,6 @@ class TreeVisualizer {
         const pivotEl = this.nodeElements.get(rotationEvent.pivotValue);
         const rootPos = this.nodeCoordinates.get(rotationEvent.rootValue);
         const pivotPos = this.nodeCoordinates.get(rotationEvent.pivotValue);
-
         if (rootEl) rootEl.classList.add('rotation-pivot');
         if (pivotEl) pivotEl.classList.add('active-sweep');
 
@@ -722,7 +658,6 @@ class TreeVisualizer {
             fluxArc.setAttribute('class', 'rotation-flux-arc');
             this.particlesLayer.appendChild(fluxArc);
         }
-
         if (window.AudioEngine) window.AudioEngine.playWarp();
 
 
@@ -730,11 +665,9 @@ class TreeVisualizer {
             const tweenDuration = 700 / speedMultiplier;
             const tweenStart = performance.now();
             const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
-
             await new Promise(resolve => {
                 function tweenStep(now) {
                     const t = easeOutCubic(Math.min((now - tweenStart) / tweenDuration, 1.0));
-
                     const cx = pivotPos.x + (rootPos.x - pivotPos.x) * t * 0.5;
                     const cy = pivotPos.y + (rootPos.y - pivotPos.y) * t * 0.5;
                     pivotEl.setAttribute('transform', `translate(${cx}, ${cy})`);
@@ -747,12 +680,9 @@ class TreeVisualizer {
                 requestAnimationFrame(tweenStep);
             });
         } else {
-
             await new Promise(r => setTimeout(r, 700 / speedMultiplier));
         }
-
         await new Promise(r => setTimeout(r, 300 / speedMultiplier));
-
         if (fluxArc) fluxArc.remove();
         if (rootEl) rootEl.classList.remove('rotation-pivot');
         if (pivotEl) pivotEl.classList.remove('active-sweep');
@@ -764,28 +694,22 @@ class TreeVisualizer {
     async animateTraversal(sequence, speedMultiplier = 1.0, onStep = null) {
         this.clearHighlights();
         const baseDelay = 400 / speedMultiplier;
-
         for (let i = 0; i < sequence.length; i++) {
             const val = sequence[i];
             const nodeEl = this.nodeElements.get(val);
-
             if (nodeEl) {
                 nodeEl.classList.add('active-sweep');
                 if (window.AudioEngine) window.AudioEngine.playNodeHover(val);
             }
-
             if (onStep) {
                 onStep(val, i);
             }
-
             await new Promise(r => setTimeout(r, baseDelay));
-
             if (nodeEl) {
                 nodeEl.classList.remove('active-sweep');
                 nodeEl.classList.add('active-target');
             }
         }
-
         if (window.AudioEngine) window.AudioEngine.playSuccess();
     }
 
@@ -824,7 +748,6 @@ class TreeVisualizer {
             arc.setAttribute('style', 'filter: drop-shadow(0 0 8px #bd00ff);');
             this.particlesLayer.appendChild(arc);
         }
-
         await new Promise(r => setTimeout(r, 400 / speedMultiplier));
 
 
@@ -833,7 +756,6 @@ class TreeVisualizer {
             newRootEl.classList.add('splay-new-root');
             if (window.AudioEngine) window.AudioEngine.playNodeHover(step.newRootValue);
         }
-
         await new Promise(r => setTimeout(r, 300 / speedMultiplier));
 
 

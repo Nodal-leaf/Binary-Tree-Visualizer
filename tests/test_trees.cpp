@@ -15,7 +15,6 @@
 #define CYAN "\033[36m"
 #define YELLOW "\033[33m"
 #define RESET "\033[0m"
-
 void testNodeEncapsulation() {
     std::cout << CYAN << "Running Test: Node Encapsulation & Queries..." << RESET << std::endl;
     Node node(42, 1);
@@ -24,15 +23,12 @@ void testNodeEncapsulation() {
     assert(node.getHeight() == 1);
     assert(node.isLeaf() == true);
     assert(node.getBalanceFactor() == 0);
-
     node.setValue(100);
     assert(node.getValue() == 100);
-
     Node* leftChild = new Node(50, 2);
     Node* rightChild = new Node(150, 3);
     node.setLeft(leftChild);
     node.setRight(rightChild);
-
     assert(node.hasLeft() == true);
     assert(node.hasRight() == true);
     assert(node.hasBothChildren() == true);
@@ -43,12 +39,10 @@ void testNodeEncapsulation() {
     assert(j["value"] == 100);
     assert(j["left"]["value"] == 50);
     assert(j["right"]["value"] == 150);
-
     delete leftChild;
     delete rightChild;
     std::cout << GREEN << "✓ Node Encapsulation passed." << RESET << std::endl;
 }
-
 void testBSTOperations() {
     std::cout << CYAN << "Running Test: BST Operations (Insert, Traversals, Search, Delete)..." << RESET << std::endl;
     BST bst;
@@ -68,17 +62,14 @@ void testBSTOperations() {
 
     std::vector<int> expectedInorder = {20, 30, 40, 50, 60, 70, 80};
     assert(bst.inorder() == expectedInorder);
-
     std::vector<int> expectedPreorder = {50, 30, 20, 40, 70, 60, 80};
     assert(bst.preorder() == expectedPreorder);
-
     std::vector<int> expectedPostorder = {20, 40, 30, 60, 80, 70, 50};
     assert(bst.postorder() == expectedPostorder);
 
 
     assert(bst.search(40) == true);
     assert(bst.search(999) == false);
-
     std::vector<int> searchPath40 = bst.getSearchPath(40);
     std::vector<int> expectedPath40 = {50, 30, 40};
     assert(searchPath40 == expectedPath40);
@@ -101,17 +92,14 @@ void testBSTOperations() {
     assert(bst.getNodeCount() == 4);
     assert(bst.search(50) == false);
     assert(bst.inorder() == (std::vector<int>{40, 60, 70, 80}));
-
     std::cout << GREEN << "✓ BST Operations passed." << RESET << std::endl;
 }
-
 void testAVLLRotations() {
     std::cout << CYAN << "Running Test: AVL LL Rotation..." << RESET << std::endl;
     AVLTree avl;
     avl.insert(30);
     avl.insert(20);
     avl.insert(10);
-
     assert(avl.getRoot()->getValue() == 20);
     assert(avl.getRoot()->getLeft()->getValue() == 10);
     assert(avl.getRoot()->getRight()->getValue() == 30);
@@ -120,14 +108,12 @@ void testAVLLRotations() {
     assert(avl.getLastRotations()[0].type == "LL");
     std::cout << GREEN << "✓ AVL LL Rotation verified: " << avl.getLastRotations()[0].description << RESET << std::endl;
 }
-
 void testAVLRRRotations() {
     std::cout << CYAN << "Running Test: AVL RR Rotation..." << RESET << std::endl;
     AVLTree avl;
     avl.insert(10);
     avl.insert(20);
     avl.insert(30);
-
     assert(avl.getRoot()->getValue() == 20);
     assert(avl.getRoot()->getLeft()->getValue() == 10);
     assert(avl.getRoot()->getRight()->getValue() == 30);
@@ -136,14 +122,12 @@ void testAVLRRRotations() {
     assert(avl.getLastRotations()[0].type == "RR");
     std::cout << GREEN << "✓ AVL RR Rotation verified: " << avl.getLastRotations()[0].description << RESET << std::endl;
 }
-
 void testAVLLRRotations() {
     std::cout << CYAN << "Running Test: AVL LR Rotation..." << RESET << std::endl;
     AVLTree avl;
     avl.insert(30);
     avl.insert(10);
     avl.insert(20);
-
     assert(avl.getRoot()->getValue() == 20);
     assert(avl.getRoot()->getLeft()->getValue() == 10);
     assert(avl.getRoot()->getRight()->getValue() == 30);
@@ -152,14 +136,12 @@ void testAVLLRRotations() {
     assert(avl.getLastRotations()[0].type == "LR");
     std::cout << GREEN << "✓ AVL LR Rotation verified: " << avl.getLastRotations()[0].description << RESET << std::endl;
 }
-
 void testAVLRLRotations() {
     std::cout << CYAN << "Running Test: AVL RL Rotation..." << RESET << std::endl;
     AVLTree avl;
     avl.insert(10);
     avl.insert(30);
     avl.insert(20);
-
     assert(avl.getRoot()->getValue() == 20);
     assert(avl.getRoot()->getLeft()->getValue() == 10);
     assert(avl.getRoot()->getRight()->getValue() == 30);
@@ -176,7 +158,6 @@ bool verifyAVLBalanceInvariant(const Node* node) {
     if (bf < -1 || bf > 1) return false;
     return verifyAVLBalanceInvariant(node->getLeft()) && verifyAVLBalanceInvariant(node->getRight());
 }
-
 void testAVLComplexSequenceAndDeletion() {
     std::cout << CYAN << "Running Test: AVL Complex Sequences & Rebalancing on Deletion..." << RESET << std::endl;
     AVLTree avl;
@@ -204,17 +185,13 @@ void testAVLComplexSequenceAndDeletion() {
     assert(treeJson["nodeCount"] == 8);
     assert(treeJson.contains("root"));
     assert(treeJson.contains("lastRotations"));
-
     std::cout << GREEN << "✓ AVL Complex Sequence & Deletion passed." << RESET << std::endl;
 }
-
 void testPolymorphismAndAbstraction() {
     std::cout << CYAN << "Running Test: Polymorphism & Abstraction via Base Pointer..." << RESET << std::endl;
-
     std::vector<std::unique_ptr<BinarySearchTree>> trees;
     trees.push_back(std::make_unique<BST>());
     trees.push_back(std::make_unique<AVLTree>());
-
     std::vector<int> testData = {10, 20, 30, 40, 50};
     for (auto& tree : trees) {
         for (int v : testData) {
@@ -232,11 +209,9 @@ void testPolymorphismAndAbstraction() {
 
 
     assert(trees[0]->inorder() == trees[1]->inorder());
-
     std::cout << GREEN << "✓ Polymorphism verified: BST height = " << trees[0]->getHeight() 
               << ", AVL height = " << trees[1]->getHeight() << RESET << std::endl;
 }
-
 void testSplayTree() {
     std::cout << CYAN << "Running Test: Splay Tree Operations (Insert, Search, Delete, Splay steps)..." << RESET << std::endl;
     SplayTree splay;
@@ -246,16 +221,12 @@ void testSplayTree() {
 
     splay.insert(10);
     assert(splay.getRoot()->getValue() == 10);
-
     splay.insert(20);
     assert(splay.getRoot()->getValue() == 20);
-
     splay.insert(5);
     assert(splay.getRoot()->getValue() == 5);
-
     splay.insert(15);
     assert(splay.getRoot()->getValue() == 15);
-
     splay.insert(25);
     assert(splay.getRoot()->getValue() == 25);
     assert(splay.getNodeCount() == 5);
@@ -283,15 +254,12 @@ void testSplayTree() {
     nlohmann::json j = splay.toJson();
     assert(j["treeType"] == "SPLAY");
     assert(j.contains("lastSplaySteps"));
-
     std::cout << GREEN << "✓ Splay Tree Operations & Splay Steps verified." << RESET << std::endl;
 }
-
 int main() {
     std::cout << YELLOW << "========================================" << RESET << std::endl;
     std::cout << YELLOW << "  BST, AVL & SPLAY OOP TEST SUITE       " << RESET << std::endl;
     std::cout << YELLOW << "========================================" << RESET << std::endl;
-
     try {
         testNodeEncapsulation();
         testBSTOperations();
@@ -302,7 +270,6 @@ int main() {
         testAVLComplexSequenceAndDeletion();
         testPolymorphismAndAbstraction();
         testSplayTree();
-
         std::cout << YELLOW << "========================================" << RESET << std::endl;
         std::cout << GREEN << " ALL OOP UNIT TESTS PASSED SUCCESSFULLY! " << RESET << std::endl;
         std::cout << YELLOW << "========================================" << RESET << std::endl;

@@ -4,22 +4,16 @@
 #include <iostream>
 #include <memory>
 #include <csignal>
-
 httplib::Server svr;
-
 void signalHandler(int signum) {
     std::cout << "\n[Server] Interrupt signal (" << signum << ") received. Shutting down gracefully..." << std::endl;
     svr.stop();
 }
-
 int main(int argc, char* argv[]) {
-
     std::signal(SIGINT, signalHandler);
     std::signal(SIGTERM, signalHandler);
-
     int port = 8080;
     std::string host = "0.0.0.0";
-
     if (argc >= 2) {
         try {
             port = std::stoi(argv[1]);
@@ -30,17 +24,12 @@ int main(int argc, char* argv[]) {
     if (argc >= 3) {
         host = argv[2];
     }
-
     std::cout << "Initializing Tree Backend Services..." << std::endl;
     auto service = std::make_shared<TreeService>("AVL");
-
     service->loadSample();
-
     TreeController controller(service);
-
     std::cout << "Starting HTTP server on " << host << ":" << port << "..." << std::endl;
     controller.start(svr, host, port);
-
     std::cout << "Server stopped." << std::endl;
     return 0;
 }

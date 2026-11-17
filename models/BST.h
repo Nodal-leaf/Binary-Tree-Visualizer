@@ -1,6 +1,5 @@
 #ifndef BST_H
 #define BST_H
-
 #include "BinarySearchTree.h"
 
 
@@ -17,7 +16,6 @@ private:
     Node* removeHelper(Node* current, int value, bool& removed);
     Node* findMin(Node* current) const;
     void updateHeight(Node* node);
-
 public:
     BST();
     ~BST() override = default;
@@ -41,6 +39,5 @@ public:
 
     std::string getTreeType() const override;
 };
-
 #endif
 

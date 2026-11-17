@@ -1,16 +1,13 @@
 #include "TreeController.h"
 #include <iostream>
 #include <nlohmann/json.hpp>
-
 TreeController::TreeController(std::shared_ptr<TreeService> service)
     : treeService_(std::move(service)) {}
-
 void TreeController::setupCors(httplib::Response& res) {
     res.set_header("Access-Control-Allow-Origin", "*");
     res.set_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
     res.set_header("Access-Control-Allow-Headers", "Content-Type, Authorization");
 }
-
 int TreeController::parseValueFromJson(const std::string& body, bool& ok) {
     ok = false;
     try {
@@ -24,9 +21,7 @@ int TreeController::parseValueFromJson(const std::string& body, bool& ok) {
     }
     return 0;
 }
-
 void TreeController::registerRoutes(httplib::Server& svr) {
-
     svr.Options(".*", [this](const httplib::Request&, httplib::Response& res) {
         setupCors(res);
         res.status = 204;
@@ -53,7 +48,6 @@ void TreeController::registerRoutes(httplib::Server& svr) {
                 preserve = j["preserve"].get<bool>();
             }
         } catch (...) {}
-
         nlohmann::json result = treeService_->switchTreeType(type, preserve);
         res.set_content(result.dump(2), "application/json");
     });
@@ -72,7 +66,6 @@ void TreeController::registerRoutes(httplib::Server& svr) {
             res.set_content(err.dump(2), "application/json");
             return;
         }
-
         nlohmann::json result = treeService_->insertValue(value);
         res.set_content(result.dump(2), "application/json");
     });
@@ -91,7 +84,6 @@ void TreeController::registerRoutes(httplib::Server& svr) {
             res.set_content(err.dump(2), "application/json");
             return;
         }
-
         nlohmann::json result = treeService_->removeValue(value);
         res.set_content(result.dump(2), "application/json");
     });
@@ -110,7 +102,6 @@ void TreeController::registerRoutes(httplib::Server& svr) {
             res.set_content(err.dump(2), "application/json");
             return;
         }
-
         nlohmann::json result = treeService_->searchValue(value);
         res.set_content(result.dump(2), "application/json");
     });
@@ -144,7 +135,6 @@ void TreeController::registerRoutes(httplib::Server& svr) {
             res.set_content(err.dump(2), "application/json");
             return;
         }
-
         nlohmann::json result = treeService_->batchInsert(values);
         res.set_content(result.dump(2), "application/json");
     });
@@ -174,7 +164,6 @@ void TreeController::registerRoutes(httplib::Server& svr) {
     svr.set_file_extension_and_mimetype_mapping("css", "text/css");
     svr.set_file_extension_and_mimetype_mapping("html", "text/html");
 }
-
 void TreeController::start(httplib::Server& svr, const std::string& host, int port) {
     registerRoutes(svr);
     std::cout << "\n========================================================" << std::endl;

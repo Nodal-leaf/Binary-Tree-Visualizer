@@ -12,7 +12,6 @@ class QuantumAudio {
         this.ctx = null;
         this.enabled = true;
     }
-
     init() {
         if (!this.ctx && typeof AudioContext !== 'undefined') {
             this.ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -21,12 +20,10 @@ class QuantumAudio {
             this.ctx.resume();
         }
     }
-
     playNodeHover(val) {
         if (!this.enabled) return;
         this.init();
         if (!this.ctx) return;
-
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
 
@@ -34,17 +31,13 @@ class QuantumAudio {
         const freq = 260 + (val % 700) * 0.8;
         osc.type = 'sine';
         osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-
         gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.28);
-
         osc.connect(gain);
         gain.connect(this.ctx.destination);
-
         osc.start();
         osc.stop(this.ctx.currentTime + 0.28);
     }
-
     playWarp() {
         if (!this.enabled) return;
         this.init();
@@ -53,68 +46,51 @@ class QuantumAudio {
 
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
-
         osc.type = 'sawtooth';
         osc.frequency.setValueAtTime(180, this.ctx.currentTime);
         osc.frequency.exponentialRampToValueAtTime(880, this.ctx.currentTime + 0.5);
-
         gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.6);
-
         osc.connect(gain);
         gain.connect(this.ctx.destination);
-
         osc.start();
         osc.stop(this.ctx.currentTime + 0.6);
     }
-
     playSuccess() {
         if (!this.enabled) return;
         this.init();
         if (!this.ctx) return;
-
         const notes = [523.25, 659.25, 783.99, 1046.50];
         notes.forEach((freq, i) => {
             const osc = this.ctx.createOscillator();
             const gain = this.ctx.createGain();
-
             osc.type = 'triangle';
             osc.frequency.setValueAtTime(freq, this.ctx.currentTime + i * 0.08);
-
             gain.gain.setValueAtTime(0.1, this.ctx.currentTime + i * 0.08);
             gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + i * 0.08 + 0.4);
-
             osc.connect(gain);
             gain.connect(this.ctx.destination);
-
             osc.start(this.ctx.currentTime + i * 0.08);
             osc.stop(this.ctx.currentTime + i * 0.08 + 0.4);
         });
     }
-
     playError() {
         if (!this.enabled) return;
         this.init();
         if (!this.ctx) return;
-
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
-
         osc.type = 'sawtooth';
         osc.frequency.setValueAtTime(140, this.ctx.currentTime);
         osc.frequency.linearRampToValueAtTime(90, this.ctx.currentTime + 0.25);
-
         gain.gain.setValueAtTime(0.18, this.ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.28);
-
         osc.connect(gain);
         gain.connect(this.ctx.destination);
-
         osc.start();
         osc.stop(this.ctx.currentTime + 0.28);
     }
 }
-
 window.AudioEngine = new QuantumAudio();
 
 
@@ -122,26 +98,20 @@ window.AudioEngine = new QuantumAudio();
 
 class CosmosApp {
     constructor() {
-
         this.apiBase = (window.location.protocol.startsWith('http')) 
             ? `${window.location.origin}/api` 
             : 'http://127.0.0.1:8080/api';
-
         this.currentMode = 'AVL';
         this.speedMultiplier = 1.0;
         this.isBusy = false;
-
         this.visualizer = new TreeVisualizer('tree-svg', {
             onNodeClick: (node) => this.showNodeTelemetry(node)
         });
-
         this.initElements();
         this.bindEvents();
         this.connectBackend();
     }
-
     initElements() {
-
         this.inputVal = document.getElementById('node-value-input');
         this.btnRandom = document.getElementById('btn-random-val');
         this.btnInsert = document.getElementById('btn-insert');
@@ -184,9 +154,7 @@ class CosmosApp {
         this.speedDisplay = document.getElementById('speed-display');
         this.audioToggle = document.getElementById('audio-toggle');
     }
-
     bindEvents() {
-
         window.addEventListener('click', () => window.AudioEngine.init(), { once: true });
 
 
@@ -221,7 +189,6 @@ class CosmosApp {
                 this.handleTraversal(type);
             });
         });
-
         this.btnCloseTraversal.addEventListener('click', () => {
             this.traversalDisplay.classList.add('hidden');
         });
@@ -242,18 +209,14 @@ class CosmosApp {
             this.missionLog.innerHTML = '';
         });
     }
-
     log(type, message) {
         const entry = document.createElement('div');
         entry.className = `log-entry ${type}`;
-
         const time = new Date().toLocaleTimeString([], { hour12: false });
         entry.innerHTML = `<span class="log-time">[${time}]</span><span class="log-text">${message}</span>`;
-
         this.missionLog.appendChild(entry);
         this.missionLog.scrollTop = this.missionLog.scrollHeight;
     }
-
     setBusy(busy) {
         this.isBusy = busy;
         const buttons = [
@@ -264,15 +227,12 @@ class CosmosApp {
             if (b) b.disabled = busy;
         });
     }
-
     updateTelemetry(treeData) {
         if (!treeData) return;
         this.statNodes.textContent = treeData.nodeCount || 0;
         this.statHeight.textContent = treeData.height || 0;
-
         if (treeData.treeType) {
             this.currentMode = treeData.treeType;
-
             [this.modeBst, this.modeAvl, this.modeSplay].forEach(btn => {
                 if (btn) btn.classList.remove('active');
             });
@@ -281,15 +241,12 @@ class CosmosApp {
             } else if (this.currentMode === 'SPLAY') {
                 if (this.modeSplay) this.modeSplay.classList.add('active');
             } else {
-
                 if (this.modeAvl) this.modeAvl.classList.add('active');
             }
         }
     }
-
     showWarpBanner(rotations) {
         if (!rotations || rotations.length === 0) return;
-
         const rot = rotations[rotations.length - 1];
         this.warpTitle.textContent = `${rot.type} ROTATION`;
         this.warpDesc.textContent = rot.description;
@@ -300,45 +257,35 @@ class CosmosApp {
             badge.textContent = 'AVL REBALANCE';
             badge.className = 'toast-badge';
         }
-
         this.warpBanner.classList.remove('hidden');
-
         this.log('warp', `[GRAVITATIONAL WARP] ${rot.description}`);
-
         setTimeout(() => {
             this.warpBanner.classList.add('hidden');
         }, 3200);
     }
-
     showSplayBanner(steps) {
         if (!steps || steps.length === 0) return;
-
         const step = steps[steps.length - 1];
         this.warpTitle.textContent = step.type.toUpperCase();
         this.warpDesc.textContent = step.description || '';
-
         const badge = document.getElementById('warp-badge');
         if (badge) {
             badge.textContent = 'SPLAY STEP';
             badge.className = 'toast-badge splay-badge';
         }
-
         this.warpBanner.classList.remove('hidden');
         this.log('info', `[SPLAY] ${step.type}: ${step.description}`);
-
         clearTimeout(this._splayBannerTimer);
         this._splayBannerTimer = setTimeout(() => {
             this.warpBanner.classList.add('hidden');
         }, 2000);
     }
-
     showNodeTelemetry(node) {
         if (!node || !this.nodeCard) return;
         const bf = node.balanceFactor || 0;
         let bfLabel = 'Balanced (0)';
         if (Math.abs(bf) === 1) bfLabel = `Tilted (${bf > 0 ? '+' : ''}${bf})`;
         if (Math.abs(bf) > 1) bfLabel = `Critical (${bf > 0 ? '+' : ''}${bf})`;
-
         this.nodeCard.classList.remove('hidden');
         this.nodeCard.innerHTML = `
             <div class="node-card-content">
@@ -350,17 +297,14 @@ class CosmosApp {
                 <button id="quick-close" class="close-btn" style="margin-left:4px">✕</button>
             </div>
         `;
-
         document.getElementById('quick-sweep')?.addEventListener('click', () => {
             this.inputVal.value = node.value;
             this.handleSearch();
         });
-
         document.getElementById('quick-collapse')?.addEventListener('click', () => {
             this.inputVal.value = node.value;
             this.handleDelete();
         });
-
         document.getElementById('quick-close')?.addEventListener('click', () => {
             this.nodeCard.classList.add('hidden');
             this.visualizer.clearHighlights();
@@ -394,7 +338,6 @@ class CosmosApp {
             this.log('warn', 'C++ backend offline. Launch build/tree_server.exe to sync with C++ server.');
         }
     }
-
     getInputValue() {
         const val = parseInt(this.inputVal.value.trim(), 10);
         if (isNaN(val) || val <= 0 || val > 9999) {
@@ -404,24 +347,19 @@ class CosmosApp {
         }
         return val;
     }
-
     async handleInsert() {
         const val = this.getInputValue();
         if (val === null || this.isBusy) return;
-
         this.setBusy(true);
         this.log('info', `Spawning celestial entity with key ${val}...`);
-
         try {
             const res = await fetch(`${this.apiBase}/insert`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ value: val })
             });
-
             const data = await res.json();
             if (data.success) {
-
                 if (data.searchPath && data.searchPath.length > 0) {
                     await this.visualizer.animateSearchPath(data.searchPath, true, this.speedMultiplier);
                 }
@@ -446,7 +384,6 @@ class CosmosApp {
                         await this.visualizer.animateSplayStep(step, this.speedMultiplier);
                     }
                 }
-
                 this.log('success', data.message);
                 this.inputVal.value = '';
             } else {
@@ -459,24 +396,19 @@ class CosmosApp {
             this.setBusy(false);
         }
     }
-
     async handleDelete() {
         const val = this.getInputValue();
         if (val === null || this.isBusy) return;
-
         this.setBusy(true);
         this.log('info', `Collapsing star with key ${val}...`);
-
         try {
             const res = await fetch(`${this.apiBase}/delete`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ value: val })
             });
-
             const data = await res.json();
             if (data.success) {
-
                 if (data.searchPath && data.searchPath.length > 0) {
                     await this.visualizer.animateSearchPath(data.searchPath, true, this.speedMultiplier);
                 }
@@ -508,7 +440,6 @@ class CosmosApp {
                         await this.visualizer.animateSplayStep(step, this.speedMultiplier);
                     }
                 }
-
                 this.log('success', data.message);
                 this.inputVal.value = '';
             } else {
@@ -521,21 +452,17 @@ class CosmosApp {
             this.setBusy(false);
         }
     }
-
     async handleSearch() {
         const val = this.getInputValue();
         if (val === null || this.isBusy) return;
-
         this.setBusy(true);
         this.log('info', `Sweeping constellation sensor for star ${val}...`);
-
         try {
             const res = await fetch(`${this.apiBase}/search`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ value: val })
             });
-
             const data = await res.json();
             if (data.path && data.path.length > 0) {
                 await this.visualizer.animateSearchPath(data.path, data.found, this.speedMultiplier);
@@ -553,7 +480,6 @@ class CosmosApp {
                     await this.visualizer.animateSplayStep(step, this.speedMultiplier);
                 }
             }
-
             if (data.found) {
                 this.log('success', `[SENSOR HIT] Star ${val} located in constellation!`);
             } else {
@@ -565,19 +491,16 @@ class CosmosApp {
             this.setBusy(false);
         }
     }
-
     async setMode(mode) {
         if (this.currentMode === mode || this.isBusy) return;
         this.setBusy(true);
         this.log('info', `Shifting gravitational architecture to ${mode}...`);
-
         try {
             const res = await fetch(`${this.apiBase}/tree/type`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ type: mode, preserve: true })
             });
-
             const data = await res.json();
             if (data.success) {
                 this.currentMode = mode;
@@ -592,12 +515,10 @@ class CosmosApp {
             this.setBusy(false);
         }
     }
-
     async handleSample() {
         if (this.isBusy) return;
         this.setBusy(true);
         this.log('info', 'Loading harmonic preset constellation...');
-
         try {
             const res = await fetch(`${this.apiBase}/sample`, { method: 'POST' });
             const data = await res.json();
@@ -613,12 +534,10 @@ class CosmosApp {
             this.setBusy(false);
         }
     }
-
     async handleClear() {
         if (this.isBusy) return;
         this.setBusy(true);
         this.log('warn', 'Initiating Supernova Collapse (clearing all entities)...');
-
         try {
             const res = await fetch(`${this.apiBase}/clear`, { method: 'POST' });
             const data = await res.json();
@@ -634,16 +553,13 @@ class CosmosApp {
             this.setBusy(false);
         }
     }
-
     async handleTraversal(type) {
         if (this.isBusy) return;
         this.setBusy(true);
         this.log('info', `Computing ${type.toUpperCase()} constellation sequence...`);
-
         try {
             const res = await fetch(`${this.apiBase}/traversal/${type}`);
             const data = await res.json();
-
             if (data.success && data.sequence && data.sequence.length > 0) {
                 this.traversalTitle.textContent = `${type.toUpperCase()} BEACON SEQUENCE (${data.sequence.length} STARS)`;
                 this.traversalChips.innerHTML = '';
@@ -668,7 +584,6 @@ class CosmosApp {
                         }
                     });
                 });
-
                 this.log('success', `${type.toUpperCase()} traversal completed.`);
             } else {
                 this.log('warn', 'Constellation is empty. Cannot traverse.');
@@ -679,7 +594,6 @@ class CosmosApp {
             this.setBusy(false);
         }
     }
-
     handleRandomValue() {
         const randomVal = Math.floor(Math.random() * 95) + 5;
         this.inputVal.value = randomVal;

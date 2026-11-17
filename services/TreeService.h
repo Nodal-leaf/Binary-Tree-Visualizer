@@ -1,6 +1,5 @@
 #ifndef TREE_SERVICE_H
 #define TREE_SERVICE_H
-
 #include "../models/BinarySearchTree.h"
 #include "../models/BST.h"
 #include "../models/AVLTree.h"
@@ -24,9 +23,7 @@ class TreeService {
 private:
     std::unique_ptr<BinarySearchTree> currentTree_;
     mutable std::mutex mutex_;
-
     void rebuildAsType(const std::string& targetType);
-
 public:
     explicit TreeService(const std::string& initialType = "AVL");
     ~TreeService() = default;
@@ -94,6 +91,5 @@ public:
 
     nlohmann::json loadSample();
 };
-
 #endif
 

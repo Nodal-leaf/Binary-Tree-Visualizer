@@ -10,15 +10,12 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
     <header class="control-bar">
-
         <div class="btn-group mode-group">
             <button id="mode-bst" class="btn mode-btn" data-mode="BST">BST</button>
             <button id="mode-avl" class="btn mode-btn active" data-mode="AVL">AVL</button>
             <button id="mode-splay" class="btn mode-btn" data-mode="SPLAY">Splay</button>
         </div>
-
         <div class="divider"></div>
 
 
@@ -31,7 +28,6 @@
             <button id="btn-sample" class="btn" title="Load Sample Tree">Sample</button>
             <button id="btn-clear" class="btn btn-danger" title="Clear Tree">Clear</button>
         </div>
-
         <div class="divider"></div>
 
 
@@ -40,7 +36,6 @@
             <button class="btn traversal-btn" data-traversal="preorder" title="Preorder Traversal">Preorder</button>
             <button class="btn traversal-btn" data-traversal="postorder" title="Postorder Traversal">Postorder</button>
         </div>
-
         <div class="divider"></div>
 
 
@@ -55,7 +50,6 @@
     <main id="svg-container">
         <svg id="tree-svg" width="100%" height="100%">
             <defs>
-
                 <filter id="neon-glow" x="-50%" y="-50%" width="200%" height="200%">
                     <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur1" />
                     <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur2" />
@@ -65,7 +59,6 @@
                         <feMergeNode in="SourceGraphic" />
                     </feMerge>
                 </filter>
-
                 <filter id="edge-glow" x="-30%" y="-30%" width="160%" height="160%">
                     <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur" />
                     <feMerge>
@@ -80,31 +73,26 @@
                     <stop offset="55%" stop-color="#00ff66" stop-opacity="0.1" />
                     <stop offset="100%" stop-color="#000000" stop-opacity="0.95" />
                 </radialGradient>
-
                 <radialGradient id="plasma-cyan" cx="50%" cy="50%" r="50%">
                     <stop offset="0%" stop-color="#39ff14" stop-opacity="0.25" />
                     <stop offset="55%" stop-color="#00ff66" stop-opacity="0.1" />
                     <stop offset="100%" stop-color="#000000" stop-opacity="0.95" />
                 </radialGradient>
-
                 <radialGradient id="plasma-gold" cx="50%" cy="50%" r="50%">
                     <stop offset="0%" stop-color="#ffff33" stop-opacity="0.35" />
                     <stop offset="60%" stop-color="#ffd700" stop-opacity="0.15" />
                     <stop offset="100%" stop-color="#000000" stop-opacity="0.95" />
                 </radialGradient>
-
                 <radialGradient id="plasma-purple" cx="50%" cy="50%" r="50%">
                     <stop offset="0%" stop-color="#39ff14" stop-opacity="0.25" />
                     <stop offset="60%" stop-color="#00ff66" stop-opacity="0.1" />
                     <stop offset="100%" stop-color="#000000" stop-opacity="0.95" />
                 </radialGradient>
-
                 <radialGradient id="plasma-crimson" cx="50%" cy="50%" r="50%">
                     <stop offset="0%" stop-color="#ff3366" stop-opacity="0.35" />
                     <stop offset="60%" stop-color="#ff0033" stop-opacity="0.15" />
                     <stop offset="100%" stop-color="#000000" stop-opacity="0.95" />
                 </radialGradient>
-
                 <linearGradient id="beam-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
                     <stop offset="0%" stop-color="#00ff66" stop-opacity="0.9" />
                     <stop offset="100%" stop-color="#39ff14" stop-opacity="0.5" />

@@ -1,26 +1,21 @@
 #include "AVLTree.h"
 #include <algorithm>
 #include <sstream>
-
 AVLTree::AVLTree() : BinarySearchTree() {}
-
 std::string AVLTree::getTreeType() const {
     return "AVL";
 }
-
 void AVLTree::updateHeight(Node* node) {
     if (node != nullptr) {
         node->setHeight(1 + std::max(getNodeHeight(node->getLeft()), getNodeHeight(node->getRight())));
     }
 }
-
 Node* AVLTree::findMin(Node* current) const {
     while (current != nullptr && current->getLeft() != nullptr) {
         current = current->getLeft();
     }
     return current;
 }
-
 Node* AVLTree::rotateRight(Node* y) {
     Node* x = y->getLeft();
     Node* T2 = x->getRight();
@@ -32,10 +27,8 @@ Node* AVLTree::rotateRight(Node* y) {
 
     updateHeight(y);
     updateHeight(x);
-
     return x;
 }
-
 Node* AVLTree::rotateLeft(Node* x) {
     Node* y = x->getRight();
     Node* T2 = y->getLeft();
@@ -47,32 +40,26 @@ Node* AVLTree::rotateLeft(Node* x) {
 
     updateHeight(x);
     updateHeight(y);
-
     return y;
 }
-
 Node* AVLTree::rotateLeftRight(Node* node) {
     node->setLeft(rotateLeft(node->getLeft()));
     return rotateRight(node);
 }
-
 Node* AVLTree::rotateRightLeft(Node* node) {
     node->setRight(rotateRight(node->getRight()));
     return rotateLeft(node);
 }
-
 Node* AVLTree::balance(Node* node) {
     if (node == nullptr) {
         return nullptr;
     }
-
     updateHeight(node);
     int bf = node->getBalanceFactor();
 
 
     if (bf > 1) {
         if (node->getLeft() != nullptr && node->getLeft()->getBalanceFactor() >= 0) {
-
             RotationStep step;
             step.type = "LL";
             step.direction = "clockwise";
@@ -86,7 +73,6 @@ Node* AVLTree::balance(Node* node) {
             lastRotations_.push_back(step);
             return res;
         } else if (node->getLeft() != nullptr) {
-
             RotationStep step;
             step.type = "LR";
             step.direction = "double-LR";
@@ -107,7 +93,6 @@ Node* AVLTree::balance(Node* node) {
 
     if (bf < -1) {
         if (node->getRight() != nullptr && node->getRight()->getBalanceFactor() <= 0) {
-
             RotationStep step;
             step.type = "RR";
             step.direction = "counter-clockwise";
@@ -121,7 +106,6 @@ Node* AVLTree::balance(Node* node) {
             lastRotations_.push_back(step);
             return res;
         } else if (node->getRight() != nullptr) {
-
             RotationStep step;
             step.type = "RL";
             step.direction = "double-RL";
@@ -138,16 +122,13 @@ Node* AVLTree::balance(Node* node) {
             return res;
         }
     }
-
     return node;
 }
-
 Node* AVLTree::insertHelper(Node* current, int value, bool& inserted) {
     if (current == nullptr) {
         inserted = true;
         return new Node(value, nextNodeId_++);
     }
-
     if (value < current->getValue()) {
         current->setLeft(insertHelper(current->getLeft(), value, inserted));
     } else if (value > current->getValue()) {
@@ -160,7 +141,6 @@ Node* AVLTree::insertHelper(Node* current, int value, bool& inserted) {
 
     return balance(current);
 }
-
 bool AVLTree::insert(int value) {
     clearLastRotations();
     bool inserted = false;
@@ -170,40 +150,32 @@ bool AVLTree::insert(int value) {
     }
     return inserted;
 }
-
 Node* AVLTree::removeHelper(Node* current, int value, bool& removed) {
     if (current == nullptr) {
         removed = false;
         return nullptr;
     }
-
     if (value < current->getValue()) {
         current->setLeft(removeHelper(current->getLeft(), value, removed));
     } else if (value > current->getValue()) {
         current->setRight(removeHelper(current->getRight(), value, removed));
     } else {
-
         removed = true;
-
         if (current->getLeft() == nullptr || current->getRight() == nullptr) {
             lastDeletion_.occurred = true;
             lastDeletion_.targetValue = value;
             lastDeletion_.hasTwoChildren = false;
             lastDeletion_.successorValue = 0;
             lastDeletion_.description = "Target node " + std::to_string(value) + " removed (leaf or single child).";
-
             Node* temp = (current->getLeft() != nullptr) ? current->getLeft() : current->getRight();
             if (temp == nullptr) {
-
                 delete current;
                 return nullptr;
             } else {
-
                 delete current;
                 return balance(temp);
             }
         } else {
-
             Node* successor = findMin(current->getRight());
             lastDeletion_.occurred = true;
             lastDeletion_.targetValue = value;
@@ -211,13 +183,11 @@ Node* AVLTree::removeHelper(Node* current, int value, bool& removed) {
             lastDeletion_.successorValue = successor->getValue();
             lastDeletion_.description = "Target node " + std::to_string(value) + " has 2 children: swapped with inorder successor " + 
                                         std::to_string(successor->getValue()) + " (minimum of right subtree).";
-
             current->setValue(successor->getValue());
             bool dummyRemoved = false;
             current->setRight(removeHelper(current->getRight(), successor->getValue(), dummyRemoved));
         }
     }
-
     if (current == nullptr) {
         return nullptr;
     }
@@ -225,7 +195,6 @@ Node* AVLTree::removeHelper(Node* current, int value, bool& removed) {
 
     return balance(current);
 }
-
 bool AVLTree::remove(int value) {
     clearLastRotations();
     clearLastDeletion();
@@ -236,15 +205,12 @@ bool AVLTree::remove(int value) {
     }
     return removed;
 }
-
 const std::vector<AVLTree::RotationStep>& AVLTree::getLastRotations() const {
     return lastRotations_;
 }
-
 void AVLTree::clearLastRotations() {
     lastRotations_.clear();
 }
-
 nlohmann::json AVLTree::toJson() const {
     nlohmann::json j = BinarySearchTree::toJson();
     nlohmann::json rotationsJson = nlohmann::json::array();
